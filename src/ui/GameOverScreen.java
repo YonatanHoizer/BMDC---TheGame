@@ -5,76 +5,116 @@ import main.Game;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 
 public class GameOverScreen extends Screen {
 
     private Game game;
-    private int lossType;      // סוג ההפסד
-    private String message;    // הטקסט שיוצג
+    private int failId;
+    private String failMessage;
 
     private int screenWidth = 1280;
     private int screenHeight = 720;
 
-    private long enterDelayStartTime;
+    private int buttonWidth = 420;
+    private int buttonHeight = 70;
+    private int buttonX;
+    private int buttonY;
 
-    public GameOverScreen(Game game, InputManager input, int lossType) {
+    public GameOverScreen(Game game, InputManager input, int failId) {
         super(input);
         this.game = game;
-        this.lossType = lossType;
+        this.failId = failId;
+        setFailMessage();
+    }
 
-        // הגדרת הטקסט לפי סוג ההפסד
-        switch (lossType) {
-            case 0:
-                message = "פסלת במשימה! אל תדאג, נסה שוב.";
-                break;
+    private void setFailMessage() {
+        // כאן אתה מגדיר את 8 סוגי הפסילות שלך
+        switch (failId) {
             case 1:
-                message = "התקרית הסתיימה בכישלון. חזור והיה זהיר יותר.";
+                failMessage = "סננס תפס אותך! עליך להתחבא מהר יותר או לצאת למסדרון.";
                 break;
             case 2:
-                message = "הפסדת את המשחק! למדו מהטעויות שלך.";
+                failMessage = "איחרת לתפילה! הרב מילר ראה שלא הגעת והחרים לך את הטלפון ל24 שעות.";
+                break;
+            case 3:
+                failMessage = "כנות לא מעניית את עקיבא בשיט...";
+                break;
+            case 4:
+                failMessage = "הרב מילר תפס אותך אם טלפון בבית מדרש";
+                break;
+            case 5:
+                failMessage = "הרב קרוייזר תפס אותך אחרי שלא הגעת לשיעור שלו";
+                break;
+            // תוסיף כאן את שאר הפסילות...
+            default:
+                failMessage = "נפסלת! נסה שנית.";
                 break;
         }
     }
 
     @Override
     public void onEnter() {
-        enterDelayStartTime = System.currentTimeMillis();
-    }
-
-    @Override
-    public void update(double deltaTime) {
-        // אפשר להוסיף עדכונים כמו טיימר או אנימציות
+        super.onEnter();
+        buttonX = (screenWidth - buttonWidth) / 2;
+        buttonY = 500; // מיקום הכפתור בחלק התחתון של המסך
     }
 
     @Override
     public void render(Graphics2D g) {
-        // רקע שחור
-        g.setColor(Color.BLACK);
+        // רקע אדום כהה כדי לשדר "פסילה"
+        g.setColor(new Color(60, 0, 0));
         g.fillRect(0, 0, screenWidth, screenHeight);
 
-        // טקסט ההפסד
+        // כותרת גדולה "פסילה"
         g.setColor(Color.RED);
-        g.setFont(new Font("Arial", Font.BOLD, 48));
-        g.drawString("Game Over", 450, 200);
+        g.setFont(new Font("Arial", Font.BOLD, 80));
+        String title = "נפסלת!";
+        FontMetrics titleMetrics = g.getFontMetrics();
+        int titleX = (screenWidth - titleMetrics.stringWidth(title)) / 2;
+        g.drawString(title, titleX, 200);
 
-        // ההודעה הייחודית
+        // הודעת הפסילה הספציפית
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.PLAIN, 28));
-        g.drawString(message, 200, 300);
+        g.setFont(new Font("Arial", Font.PLAIN, 32));
+        FontMetrics msgMetrics = g.getFontMetrics();
+        int msgX = (screenWidth - msgMetrics.stringWidth(failMessage)) / 2;
+        g.drawString(failMessage, msgX, 350);
 
-        // הוראות חזרה לתפריט
-        g.setFont(new Font("Arial", Font.PLAIN, 20));
-        g.setColor(Color.LIGHT_GRAY);
-        g.drawString("לחץ על ENTER כדי לחזור לתפריט הראשי", 400, 500);
+        // ציור הכפתור לחזרה (מוגדר כ-true כי הוא תמיד מסומן - יש רק כפתור אחד)
+        drawButton(g, "חזור לתפריט הראשי", buttonX, buttonY, true);
+    }
+
+    private void drawButton(Graphics2D g, String text, int x, int y, boolean selected) {
+        if (selected) g.setColor(new Color(60, 60, 60));
+        else g.setColor(new Color(30, 30, 30));
+
+        g.fillRoundRect(x, y, buttonWidth, buttonHeight, 20, 20);
+
+        if (selected) g.setColor(Color.YELLOW);
+        else g.setColor(Color.WHITE);
+
+        g.drawRoundRect(x, y, buttonWidth, buttonHeight, 20, 20);
+
+        g.setFont(new Font("Arial", Font.BOLD, 28));
+        g.setColor(Color.WHITE);
+
+        // מרכוז הטקסט בתוך הכפתור
+        FontMetrics fm = g.getFontMetrics();
+        int textX = x + (buttonWidth - fm.stringWidth(text)) / 2;
+        int textY = y + ((buttonHeight - fm.getHeight()) / 2) + fm.getAscent();
+        g.drawString(text, textX, textY);
     }
 
     @Override
     public void handleInput(InputManager input) {
-        if (System.currentTimeMillis() - enterDelayStartTime < 500) {
+        if (System.currentTimeMillis() - enterLockTimer < 500 && !canPressEnter()) {
             return;
         }
-        if (input.ENTER_key) {
+
+        // כשיש רק כפתור אחד, רק מחכים לאנטר
+        if (input.ENTER_key && canPressEnter()) {
             game.setScreen(new MainMenuScreen(game, input));
         }
     }

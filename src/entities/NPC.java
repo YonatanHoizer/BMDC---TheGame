@@ -11,47 +11,54 @@ import static engine.Time.deltaTime;
 
 public class NPC extends MovableEntity {
 
-    protected float visionRange = 200f;
+    protected float visionRange = 570.0f;
     protected boolean alert = false;
     protected MovementAI movementAI;
+    protected int colorIndex;
+    protected int firstPosition;
 
-    // שינוי בבנאי: מקבל מידות ומעביר ל-super בלי sprite ראשוני
-    public NPC(float x, float y, int width, int height,int colorIndex) {
+    public NPC(float x, float y, int width, int height,int colorIndex,int firstPosition) {
         super(x, y, width, height);
-        this.speed =150.0f;
-        loadAnimationsByIndex(colorIndex);
+        this.speed = 150.0f;
+        this.colorIndex = colorIndex;
+        this.firstPosition = firstPosition;
+        loadAnimations();
     }
 
-    private void loadAnimationsByIndex(int index) {
-        String npcType1 = "" ;
+    protected void loadAnimations() {
+        loadAnimationsByIndex(colorIndex, firstPosition);
+    }
+
+    private void loadAnimationsByIndex(int index ,int position) {
+        String npcType1 = "";
         String npcType2 = "";
         String npcType3 = "";
         try {
             switch (index){
                 case 0:
-                    npcType1 ="/entities/בלונדיני קדימה.png";
-                    npcType2 ="/entities/בלונדיני אחורה.png";
-                    npcType3 ="/entities/בלונדיני צד.png";
+                    npcType1 = "/images/בלונדיני קדימה.png";
+                    npcType2 = "/images/בלונדיני אחורה.png";
+                    npcType3 = "/images/בלונדיני צד.png";
                     break;
                 case 1:
-                    npcType1 ="/entities/טראמפ קדימה.png";
-                    npcType2 ="/entities/טראמפ אחורה.png";
-                    npcType3 ="/entities/טראמפ צד.png";
+                    npcType1 = "/images/טראמפ קדימה.png";
+                    npcType2 = "/images/טראמפ אחורה.png";
+                    npcType3 = "/images/טראמפ צד.png";
                     break;
                 case 2:
-                    npcType1 ="/entities/ג'ינג'י קדימה.png";
-                    npcType2 ="/entities/ג'ינג'י אחורה.png";
-                    npcType3 ="/entities/ג'ינג'י צד.png";
+                    npcType1 = "/images/ג'ינג'י קדימה.png";
+                    npcType2 = "/images/ג'ינג'י אחורה.png";
+                    npcType3 = "/images/ג'ינג'י צד.png";
                     break;
                 case 3:
-                    npcType1 ="/entities/שחור קדימה.png";
-                    npcType2 ="/entities/שחור אחורה.png";
-                    npcType3 ="/entities/שחור צד.png";
+                    npcType1 = "/images/שחור קדימה.png";
+                    npcType2 = "/images/שחור אחורה.png";
+                    npcType3 = "/images/שחור צד.png";
                     break;
                 case 4:
-                    npcType1 ="/entities/player-front.png";
-                    npcType2 ="/entities/player-back.png";
-                    npcType3 ="/entities/player-side.png";
+                    npcType1 = "/images/player-front.png";
+                    npcType2 = "/images/player-back.png";
+                    npcType3 = "/images/player-side.png";
                     break;
             }
 
@@ -80,7 +87,24 @@ public class NPC extends MovableEntity {
                     sideSheet.getSubimage(64, 64, 64, 64)
             };
 
-            this.sprite = walkDown[0];
+            switch (position) {
+                case 1 :
+                    this.direction = "DOWN";
+                    this.sprite = walkDown[0];
+                    break;
+                case 2 :
+                    this.direction = "LEFT";
+                    this.sprite = walkLeft[0];
+                    break;
+                case 3 :
+                    this.direction = "RIGHT";
+                    this.sprite = walkRight[0];
+                    break;
+                case 4 :
+                    this.direction = "UP";
+                    this.sprite = walkUp[0];
+                    break;
+            }
 
         } catch (Exception e) {
             System.out.println("Error loading NPC color index " + index + ": " + e.getMessage());
@@ -122,6 +146,14 @@ public class NPC extends MovableEntity {
         alert = value;
     }
 
+    public boolean isAlert() {
+        return alert;
+    }
+
+    public MovementAI getMovementAI() {
+        return this.movementAI;
+    }
+
     @Override
     public void Render(Graphics g) {
         // מצייר את ה-sprite הנוכחי (האנימציה)
@@ -131,7 +163,7 @@ public class NPC extends MovableEntity {
         if (alert) {
             g.setColor(Color.RED);
             g.setFont(new Font("Arial", Font.BOLD, 20));
-            g.drawString("!", (int) x + width / 2 - 5, (int) y - 10);
+            g.drawString("!", (int) x + width / 2 - 5, (int) y - 5);
         }
     }
 }

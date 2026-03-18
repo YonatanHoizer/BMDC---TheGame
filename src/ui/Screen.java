@@ -14,7 +14,7 @@ public abstract class Screen {
     }
 
     public void onEnter() {
-        enterLockTimer = 0.4; // חצי שנייה חסימה (אפשר 0.2–0.4)
+        enterLockTimer = 0.4;
     }
 
     public void onExit() {

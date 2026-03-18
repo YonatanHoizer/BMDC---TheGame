@@ -14,7 +14,7 @@ public class Timer {
     private Color color = Color.WHITE;
 
 
-    public Timer(double timeSeconds, int x, int y) {
+    public Timer(double timeSeconds) {
         this.remainingTime = timeSeconds;
         this.x = x;
         this.y = y;

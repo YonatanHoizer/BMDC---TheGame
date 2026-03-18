@@ -1,117 +1,114 @@
-//package npcs;
-//
-//import entities.NPC;
-//import entities.Player;
-//import world.GameWorld;
-//
-//import javax.imageio.ImageIO;
-//import java.awt.Graphics;
-//import java.awt.image.BufferedImage;
-//
-//public class Miller extends NPC {
-//
-//    // ================= תמונות מקור (SpriteSheets) =================
-//    private BufferedImage sideSheet;
-//    private BufferedImage frontSheet;
-//    private BufferedImage backSheet;
-//
-//    // ================= אנימציה =================
-//    private BufferedImage currentFrame;
-//    private int frameIndex = 0;              // 0 או 1 (2 פריימים)
-//    private double animTimer = 0;
-//    private double animSpeed = 0.25;         // כל כמה שניות להחליף פריים
-//
-//    // ================= חיתוך =================
-//    private final int FRAME_W = width;
-//    private final int FRAME_H = height;
-//
-//    public Miller(float x, float y) {
-//        super(x, y, null);
-//
-//        loadImages();
-//
-//        // ברירת מחדל: עומד קדימה פריים ראשון
-//        currentFrame = cutFrame(frontSheet, 0);
-//        this.sprite = currentFrame;
-//
-//
-//    }
-//
-//    private void loadImages() {
-//        try {
-//            // התמונות בתוך הפקטה npcs
-//            sideSheet  = ImageIO.read(getClass().getResource("/npcs/מילר.צדדים.png"));
-//            frontSheet = ImageIO.read(getClass().getResource("/npcs/מילר.קדימה.png"));
-//            backSheet  = ImageIO.read(getClass().getResource("/npcs/מילר.אחורה.png"));
-//        } catch (Exception e) {
-//            System.out.println("Failed to load Miller sprites!");
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    // חותך פריים מהשיט: פריים 0 = החתיכה הראשונה משמאל, פריים 1 = השנייה
-//    private BufferedImage cutFrame(BufferedImage sheet, int index) {
-//        if (sheet == null) return null;
-//        return sheet.getSubimage(index * FRAME_W, 0, FRAME_W, FRAME_H);
-//    }
-//
-//    @Override
-//    public void update(GameWorld world) {
-//        super.update(world);
-//
-//        // קובע איזה כיוון לפי dx/dy (שהוגדר מבחוץ)
-//        BufferedImage activeSheet = frontSheet;
-//
-//        if (Math.abs(dx) > Math.abs(dy)) {
-//            // הולך לצדדים (ימין/שמאל)
-//            activeSheet = sideSheet;
-//        } else {
-//            if (dy > 0) {
-//                // למטה (קדימה)
-//                activeSheet = frontSheet;
-//            } else if (dy < 0) {
-//                // למעלה (אחורה)
-//                activeSheet = backSheet;
-//            } else {
-//                // עומד במקום -> תשאיר את מה שהיה
-//                activeSheet = null;
-//            }
-//        }
-//
-//        // אנימציה רק אם הוא זז
-//        boolean isMoving = (dx != 0 || dy != 0);
-//
-//        if (isMoving) {
-//            animTimer += 1.0 / 60.0; // אם אתה לא שולח deltaTime אז נניח 60FPS
-//
-//            if (animTimer >= animSpeed) {
-//                animTimer = 0;
-//                frameIndex = 1 - frameIndex; // 0<->1
-//            }
-//        } else {
-//            // אם עומד במקום נחזיר לפריים הראשון
-//            frameIndex = 0;
-//        }
-//
-//        // עדכון הפריים הנוכחי
-//        if (activeSheet != null) {
-//            currentFrame = cutFrame(activeSheet, frameIndex);
-//            if (currentFrame != null) {
-//                this.sprite = currentFrame;
-//            }
-//        }
-//    }
-//
-//    // בדיקה אם השחקן במרחק ראיה בעת שימוש בטלפון
-//    public boolean seePlayerOnPhone(Player player) {
-//        if (player.isPhoneOpen() && canSee(player)) {
-//            return true;
-//        }
-//        return false;
-//    }
-//
-//    @Override
-//    public void Render(Graphics g) {
-//        super.Render(g);
-//    }
-//}
+package npcs;
+
+import ai.MovementAI;
+import entities.NPC;
+import entities.Player;
+import world.GameWorld;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+
+public class Miller extends NPC {
+
+    private boolean active = true;
+    private MovementAI baseAI; // שומר את הפטרול הרגיל שלו כדי שיוכל לחזור אליו
+
+    // טווחים ומהירויות של מילר
+    private final float DETECTION_RANGE = 400.0f;
+    private final float CATCH_RANGE = 60.0f;
+    private final float NORMAL_SPEED = 150.0f;
+    private final float CHASE_SPEED = 280.0f;
+
+    public Miller(float x, float y, int width, int height) {
+        // צבע 0, מיקום התחלתי 1 (למטה)
+        super(x, y, width, height, 0, 1);
+        this.speed = NORMAL_SPEED;
+    }
+
+    @Override
+    protected void loadAnimations() {
+        loadMillerAnimationsByIndex(firstPosition);
+    }
+
+    private void loadMillerAnimationsByIndex(int position) {
+        // שים לב לעדכן את הנתיבים בהתאם לתמונות האמיתיות של מילר
+        String[] paths = {
+                "/images/שחור קדימה.png",
+                "/images/שחור אחורה.png",
+                "/images/שחור צד.png"
+        };
+
+        try {
+            BufferedImage frontSheet = ImageIO.read(getClass().getResourceAsStream(paths[0]));
+            BufferedImage backSheet  = ImageIO.read(getClass().getResourceAsStream(paths[1]));
+            BufferedImage sideSheet  = ImageIO.read(getClass().getResourceAsStream(paths[2]));
+
+            walkDown  = new BufferedImage[] { frontSheet.getSubimage(0, 64, 64, 64), frontSheet.getSubimage(0, 128, 64, 64) };
+            walkUp    = new BufferedImage[] { backSheet.getSubimage(0, 0, 64, 64), backSheet.getSubimage(0, 64, 64, 64) };
+            walkRight = new BufferedImage[] { sideSheet.getSubimage(0, 0, 64, 64), sideSheet.getSubimage(64, 0, 64, 64) };
+            walkLeft  = new BufferedImage[] { sideSheet.getSubimage(0, 64, 64, 64), sideSheet.getSubimage(64, 64, 64, 64) };
+
+            switch (position) {
+                case 1 -> this.sprite = walkDown[0];
+                case 2 -> this.sprite = walkLeft[0];
+                case 3 -> this.sprite = walkRight[0];
+                case 4 -> this.sprite = walkUp[0];
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error loading Miller textures: " + e.getMessage());
+        }
+    }
+
+    public void setMillerPatrolAI(MovementAI ai) {
+        this.baseAI = ai;
+        this.setMovementAI(ai);
+    }
+
+    @Override
+    public void update(GameWorld world) {
+        if (!active) return;
+        super.update(world);
+    }
+
+    // הלוגיקה הייחודית של מילר! מחזיר true אם הוא תפס את השחקן
+    public boolean checkPhoneAndChase(Player player) {
+        boolean phoneOpen = player.isPhoneOpen();
+        float distSq = this.getDistanceSquared(player);
+
+        // אם השחקן עם טלפון פתוח ובטווח זיהוי
+        if (phoneOpen && distSq <= (DETECTION_RANGE * DETECTION_RANGE)) {
+
+            this.setAlert(true);
+            this.setSpeed(CHASE_SPEED);
+
+            // במקום לחשב תזוזה ידנית, פשוט מלבישים עליו את ה-ChaseAI!
+            // הבדיקה (instanceof) מוודאת שלא ניצור AI חדש בכל פריים סתם
+            if (!(this.movementAI instanceof ai.ChaseAI)) {
+                this.setMovementAI(new ai.ChaseAI(player));
+            }
+
+            // אם תפס אותו (מרחק קטן מ-60)
+            if (distSq <= (CATCH_RANGE * CATCH_RANGE)) {
+                return true; // נתפס!
+            }
+        }
+        else {
+            // השחקן סגר את הטלפון או התרחק - מילר נרגע
+            if (this.isAlert()) {
+                this.setAlert(false);
+                this.stop();
+                this.setSpeed(NORMAL_SPEED);
+
+                // הנה למה היינו חייבים את baseAI: מחזירים אותו לפטרול השגרה!
+                this.setMovementAI(baseAI);
+            }
+        }
+
+        return false; // לא נתפס
+    }
+
+    public void deactivate() {
+        active = false;
+    }
+}

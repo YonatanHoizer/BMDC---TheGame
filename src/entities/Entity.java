@@ -33,6 +33,26 @@ public class Entity {
         return bounds;
     }
 
+    /**
+     * מחשב את המרחק הריבועי (כדי לחסוך ביצועים) בין מרכז האובייקט הזה למרכז של אובייקט אחר
+     */
+    public float getDistanceSquared(Entity other) {
+        if (other == null) return Float.MAX_VALUE; // הגנה מקריסות אם האובייקט נמחק (כמו החלב)
+
+        // חישוב המרכז של האובייקט שלנו
+        float thisCenterX = this.x + (this.width / 2.0f);
+        float thisCenterY = this.y + (this.height / 2.0f);
+
+        // חישוב המרכז של האובייקט השני
+        float otherCenterX = other.getX() + (other.getWidth() / 2.0f);
+        float otherCenterY = other.getY() + (other.getHeight() / 2.0f);
+
+        float dx = thisCenterX - otherCenterX;
+        float dy = thisCenterY - otherCenterY;
+
+        return dx * dx + dy * dy;
+    }
+
     // Getters and Setters
     public float getX() { return x; }
     public void setX(float x) { this.x = x; }

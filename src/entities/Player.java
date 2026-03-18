@@ -1,11 +1,11 @@
 package entities;
 
+import engine.AudioManager;
 import engine.InputManager;
 import hud.PhoneMessage;
 import ui.Screen;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +16,15 @@ public class Player extends MovableEntity {
     private boolean phoneOpen = false;
     private List<PhoneMessage> phoneMessages;
     private int unreadCount = 0;
+    private boolean inDialogue = false;
+    private AudioManager audio;
 
     public Player(float x, float y) {
-        // קריאה לבנאי של MovableEntity עם גודל 64x64
         super(x, y, 64, 64);
 
         this.phoneMessages = new ArrayList<>();
         this.speed = 350.0f;
-        this.animationSpeed = 10; // הגדרת מהירות האנימציה שירשנו
+        this.animationSpeed = 10;
 
         loadAnimations();
     }
@@ -31,9 +32,9 @@ public class Player extends MovableEntity {
     private void loadAnimations() {
         try {
             // טעינת הקבצים המקוריים שלך
-            BufferedImage frontSheet = ImageIO.read(getClass().getResourceAsStream("/entities/player-front.png"));
-            BufferedImage backSheet  = ImageIO.read(getClass().getResourceAsStream("/entities/player-back.png"));
-            BufferedImage sideSheet  = ImageIO.read(getClass().getResourceAsStream("/entities/player-side.png"));
+            BufferedImage frontSheet = ImageIO.read(getClass().getResourceAsStream("/images/player-front.png"));
+            BufferedImage backSheet  = ImageIO.read(getClass().getResourceAsStream("/images/player-back.png"));
+            BufferedImage sideSheet  = ImageIO.read(getClass().getResourceAsStream("/images/player-side.png"));
 
             // השמה למערכים שירשנו מ-MovableEntity
             walkDown = new BufferedImage[] {
@@ -65,14 +66,12 @@ public class Player extends MovableEntity {
     }
 
     public void update(InputManager input, Screen currentScreen) {
-        if (!phoneOpen) {
+        if (!phoneOpen && !inDialogue) {
             handleMovement(input);
-            // שים לב: בתוך ה-GameWorld תקרא ל-player.move(deltaTime).
-            // ה-move יקרא אוטומטית ל-updateAnimation() שירשנו.
         }
 
         // לוגיקת טלפון
-        if (input.ENTER_key && currentScreen.canPressEnter()) {
+        if (input.ENTER_key && currentScreen.canPressEnter() && !inDialogue) {
             togglePhone();
             currentScreen.resetEnterTimer();
         }
@@ -96,14 +95,27 @@ public class Player extends MovableEntity {
         if (phoneOpen && unreadCount > 0) unreadCount--;
     }
 
+    public void setInDialogue(boolean value) {
+        this.inDialogue = value;
+        if (inDialogue) stop();
+    }
+
     public void addMessage(String sender, String text) {
         phoneMessages.add(new PhoneMessage(sender, text));
         if (!phoneOpen) unreadCount++;
+
+        if (this.audio != null) {
+            this.audio.play("notification"); // נגן את צליל ההתראה
+        }
     }
 
     public boolean isPhoneOpen() { return phoneOpen; }
+
     public List<PhoneMessage> getPhoneMessages() { return phoneMessages; }
+
     public int getUnreadCount() { return unreadCount; }
 
-    // הסרנו את Render כי super.Render(g) ב-Entity עושה בדיוק את אותה עבודה
+    public void setAudioManager(AudioManager audio) {
+        this.audio = audio;
+    }
 }
