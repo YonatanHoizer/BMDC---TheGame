@@ -13,6 +13,9 @@ import ui.GameScreen;
 import static engine.Time.deltaTime;
 import entities.Player;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DormitoryEvent extends GameState {
 
     private Zone dormRoom;
@@ -21,7 +24,7 @@ public class DormitoryEvent extends GameState {
     private Zone secondedormRoom;
     private Zone thirdDormRoom;
 
-    private NPC npc1;
+    private List<NPC> DormitoryNpcs = new ArrayList<>();
     private Sanans sanans;
     private ScriptedMovementAI sanansAI;
 
@@ -42,22 +45,35 @@ public class DormitoryEvent extends GameState {
         phase = Phase.WAITING_FOR_SANANS;
         completed = false;
 
-        npc1 = new NPC(25 * 64,52 * 64,64,64,3,1);
-        npc1.setMovementAI(new PatrolAI(thirdDormRoom));
-        world.addNPC(npc1);
+        DormitoryNpcs.add(new NPC(25 * 64,52 * 64,64,64,5,1));
+        DormitoryNpcs.get(0).setMovementAI(new PatrolAI(thirdDormRoom));
+        world.addNPC(DormitoryNpcs.get(0));
+        DormitoryNpcs.add(new NPC(21 * 64,42 * 64,64,64,3,1));
+        DormitoryNpcs.get(1).setMovementAI(new PatrolAI(secondedormRoom));
+        world.addNPC(DormitoryNpcs.get(1));
+        DormitoryNpcs.add(new NPC(26 * 64,50 * 64,64,64,4,1));
+        DormitoryNpcs.get(2).setMovementAI(new PatrolAI(thirdDormRoom));
+        world.addNPC(DormitoryNpcs.get(2));
+        DormitoryNpcs.add(new NPC(17 * 64,55 * 64,64,64,4,4));
+        world.addNPC(DormitoryNpcs.get(3));
+        DormitoryNpcs.add(new NPC(14 * 64,55 * 64,64,64,4,4));
+        world.addNPC(DormitoryNpcs.get(4));
+        DormitoryNpcs.add(new NPC(12 * 64,51 * 64,64,64,4,1));
+        world.addNPC(DormitoryNpcs.get(5));
+        DormitoryNpcs.add(new NPC(10 * 64,41 * 64,64,64,4,1));
+        world.addNPC(DormitoryNpcs.get(6));
+        DormitoryNpcs.add(new NPC(16 * 64,45 * 64,64,64,4,4));
+        world.addNPC(DormitoryNpcs.get(7));
+
 
         sanans = new Sanans(8 * 64, 47 * 64, 64, 64);
         sanansAI = ScriptedMovementAI.createDormitorySanansAI();
         sanans.setSanansScriptedMovement(sanansAI);
         world.addNPC(sanans);
 
-        world.audio.loadSound("Sananes1" , "/sounds/בוקר טוב תביא את הטלפון.wav");
-        world.audio.loadSound("Sananes3" , "/sounds/אני לא רוצה לקחת לך את הטלפון.wav");
-        world.audio.loadSound("Sananes2" , "/sounds/ראית מה השעה עכשיו תרד למטה .wav");
-        world.audio.setVolume("Sananes1", 0.8F);
-        world.audio.setVolume("Sananes2", 0.8F);
-        world.audio.setVolume("Sananes3", 0.8F);
-        world.audio.play("Sananes1");
+
+        world.audio.loadSound("סננס","/sounds/סננס סאונד.wav");
+        world.audio.play("סננס");
         world.getHUD().showTopMessage("סננס מתקרב לחדר! עליך להתחבא מהר לפני שהוא נכנס \n אתה יכול גם לצאת למסדרון כדי להתחמק ממנו", 5.0); // - ככה מוסיפים הודעה על המסך
     }
 
@@ -100,16 +116,14 @@ public class DormitoryEvent extends GameState {
         // השחקן יצא למסדרון לפני שסננס נכנס
         if (playerInCorridor && !sanansInDorm) {
             phase = Phase.SANANS_MOVED_TO_OTHER_ROOM;
-            moveSanansToOtherRoom();
-            world.audio.stop("Sananes1");
-            world.audio.play("Sananes2");
+            moveSanansToOtherRoom1();
             return;
         }
 
         // סננס נכנס לחדר
         if (sanansInDorm) {
             if (playerInDorm) {
-                failPlayer();
+                failPlayer(world);
                 return;
             }
             phase = Phase.SANANS_IN_DORM;
@@ -126,11 +140,10 @@ public class DormitoryEvent extends GameState {
         if (!sanansInDorm) {
             moveSanansToOtherRoom();
             phase = Phase.SANANS_MOVED_TO_OTHER_ROOM;
-            world.audio.play("Sananes3");
         }
         // השחקן נכנס לחדר בזמן שסננס שם
         if (dormRoom.contains(px, py)) {
-            failPlayer();
+            failPlayer(world);
         }
     }
 
@@ -148,10 +161,9 @@ public class DormitoryEvent extends GameState {
 
         // אם סננס נכנס לחדר השני והשחקן כבר שם → פסילה
         if (sanansInSecondRoom && playerInSecondRoom) {
-            failPlayer();
+            failPlayer(world);
         }
         if (sanansAI.isFinished()) {
-            System.out.println("שלב אחת הסתיים");
             finishEvent();
         }
     }
@@ -160,8 +172,13 @@ public class DormitoryEvent extends GameState {
         sanansAI = ScriptedMovementAI.createDormitorySanansAI2();
         sanans.setSanansScriptedMovement(sanansAI);
     }
+    private void moveSanansToOtherRoom1() {
+        sanansAI = ScriptedMovementAI.createDormitorySanansAI3();
+        sanans.setSanansScriptedMovement(sanansAI);
+    }
 
-    private void failPlayer() {
+    private void failPlayer(GameWorld world) {
+        world.audio.stopAll();
         fail(1);
     }
 
@@ -177,9 +194,11 @@ public class DormitoryEvent extends GameState {
             sanans.deactivate();
             world.removeNPC(sanans);
         }
-        if (npc1 != null) {
-            world.removeNPC(npc1);
+        for (NPC n : DormitoryNpcs) {
+            world.removeNPC(n);
         }
-        world.audio.stopAll();
+        DormitoryNpcs.clear();
+
+        world.audio.stop("סננס");
     }
 }

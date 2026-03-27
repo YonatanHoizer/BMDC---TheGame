@@ -22,8 +22,8 @@ public class LessonEvent extends GameState {
     private Zone playerSeat; // האזור הקטן שבו השחקן צריך לעמוד כדי "לשבת"
 
     // טיימרים
-    private double timeToEnterClass = 30.0;
-    private double surviveChaseTimer = 30.0;
+    private double timeToEnterClass = 15.0;
+    private double surviveChaseTimer = 20.0;
     private double sleepTimer = 10.0; // 10 שניות של הירדמות
 
     // ניהול מסרים בזמן ההירדמות
@@ -65,17 +65,16 @@ public class LessonEvent extends GameState {
         phase = Phase.WAITING_TO_ENTER;
         completed = false;
 
-        // הודעה לטלפון על תחילת השיעור
         world.getPlayer().addMessage("הרב קרוייזר", "השיעור היום מתחיל עוד מעט בכיתה. כולם להזדרז להגיע!");
+        world.audio.loadSound("מרדף קרוייזר","/sounds/עקיבא מרדף.wav");
 
-        // יצירת קרויזר (עומד בראש הכיתה) - תשנה את המיקום לפי המפה שלך
         kroyzer = new Kroyzer(34 * 64, 26 * 64, 64, 64);
         world.addNPC(kroyzer);
 
         if (allSederNpcs != null) {
             for (int i = 0; i < allSederNpcs.size(); i++) {
                 NPC npc = allSederNpcs.get(i);
-                if (i < 2) { // לוקחים את ה-2 הראשונים
+                if (i < 3) {
 
                     // חשוב מאוד: יוצרים AI חדש לכל אחד!
                     ScriptedMovementAI walkAI = ScriptedMovementAI.createWalkToClassAI();
@@ -149,8 +148,9 @@ public class LessonEvent extends GameState {
         // 2. השחקן איחר - מתחיל מרדף!
         if (timeToEnterClass <= 0) {
             phase = Phase.KROIZER_CHASE;
-            world.getHUD().showTopMessage("איחרת לשיעור! קרויזר בעקבותיך. שרוד 30 שניות!", 4.0);
+            world.getHUD().showTopMessage("איחרת לשיעור! קרויזר בעקבותיך. שרוד 20 שניות!", 4.0);
             kroyzer.startChase(player);
+            world.audio.loop("מרדף קרוייזר");
         }
     }
 
@@ -208,6 +208,7 @@ public class LessonEvent extends GameState {
             player.setInDialogue(false);
             finishEventWithLunch(world);
             world.setFadeAlpha(0f);
+            world.getHUD().showTopMessage("לא היית מסוגל להשאיר את העיינים פתוחות יותר מכמה שניות ונרדמת, כולם כבר הלכו", 4.0);
         }
     }
 
@@ -217,13 +218,14 @@ public class LessonEvent extends GameState {
         // 1. קרויזר תפס את השחקן
         if (kroyzer.hasCaughtPlayer(player)) {
             fail(5); // פסילה סוג 5
+            world.audio.stopAll();
             return;
         }
 
         // 2. השחקן שרד 30 שניות!
         if (surviveChaseTimer <= 0) {
             kroyzer.stopChase();
-
+            world.audio.stop("מרדף קרוייזר");
             world.getHUD().showTopMessage("שרדת! קרויזר התייאש וחזר לכיתה.", 4.0);
             finishEventWithLunch(world);
         }
@@ -232,8 +234,7 @@ public class LessonEvent extends GameState {
     private void finishEventWithLunch(GameWorld world) {
         completed = true;
         phase = Phase.FINISHED;
-        world.getPlayer().addMessage("עקיבא", "ארוחת צהריים עכשיו בחדר אוכל ,יש היום הפתעה!.");
-        System.out.println("סיום שלב השיעור - מעבר לצהריים.");
+        world.getPlayer().addMessage("עקיבא", "ארוחת צהריים עכשיו בחדר אוכל ,מי שלא יגיע בזמן לא ישאר לו.");
     }
 
     @Override
@@ -255,5 +256,10 @@ public class LessonEvent extends GameState {
             world.removeNPC(npc);
         }
         SomeSederNpcs.clear();
+
+        if (kroyzer != null){
+            world.getStoryManager().setKroyzer(this.kroyzer);
+        }
+
     }
 }

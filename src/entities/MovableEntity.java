@@ -14,7 +14,7 @@ public abstract class MovableEntity extends Entity {
     protected String direction = "DOWN";
     protected int animationTick = 0;
     protected int animationFrame = 0;
-    protected int animationSpeed = 10;
+    protected int animationSpeed = 15;
 
     public MovableEntity(float x, float y, int width, int height) {
         super(x, y, width, height, null);

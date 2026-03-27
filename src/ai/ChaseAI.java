@@ -58,7 +58,7 @@ public class ChaseAI implements MovementAI {
             // אם אנחנו תקועים כבר רבע שנייה ברציפות
             if (stuckTimer > 0.25f) {
                 stuckTimer = 0f;
-                evadeTimer = 0.5f; // מתחילים עקיפה של חצי שנייה
+                evadeTimer = 0.7f; // מתחילים עקיפה של חצי שנייה
 
                 // טריק מתמטי: וקטור מאונך (90 מעלות) לכיוון השחקן
                 // אפשר ללכת שמאלה (dy, -dx) או ימינה (-dy, dx)

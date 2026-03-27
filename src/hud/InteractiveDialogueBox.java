@@ -33,7 +33,8 @@ public class InteractiveDialogueBox {
     private final int height = 100;
 
     private final Font textFont = new Font("Arial", Font.BOLD, 18);
-    private final Font optionFont = new Font("Arial", Font.BOLD, 22);
+    // הוקטן גודל הפונט של האופציות מ-22 ל-16
+    private final Font optionFont = new Font("Arial", Font.BOLD, 16);
 
     public void update(double deltaTime) {
         if (inputTimer > 0) inputTimer -= deltaTime;
@@ -120,17 +121,24 @@ public class InteractiveDialogueBox {
         // ציור אופציות בחירה (אם רלוונטי)
         if (isChoiceMode && currentPage == pages.size() - 1) {
             g.setFont(optionFont);
+            FontMetrics optMetrics = g.getFontMetrics(optionFont);
             int optionsY = y + height - 15; // מיקום האופציות בתחתית התיבה
 
-            // אופציה 1 (ימין)
+            // הרכבת המחרוזות עם החץ למי שמסומן
+            String opt1Text = (selectedOption == 0 ? "> " : "") + options[0];
+            String opt2Text = (selectedOption == 1 ? "> " : "") + options[1];
+
+            // אופציה 1 (צד ימין - מיושר לימין התיבה דינמית)
             if (selectedOption == 0) g.setColor(Color.YELLOW);
             else g.setColor(Color.WHITE);
-            g.drawString((selectedOption == 0 ? "> " : "") + options[0], x + width - 225, optionsY);
+            int opt1X = x + width - optMetrics.stringWidth(opt1Text) - 30; // 30 פיקסלים מהקיר הימני
+            g.drawString(opt1Text, opt1X, optionsY);
 
-            // אופציה 2 (שמאל)
+            // אופציה 2 (צד שמאל - מיושר לשמאל התיבה דינמית)
             if (selectedOption == 1) g.setColor(Color.YELLOW);
             else g.setColor(Color.WHITE);
-            g.drawString((selectedOption == 1 ? "> " : "") + options[1], x + 100, optionsY);
+            int opt2X = x + 30; // 30 פיקסלים מהקיר השמאלי
+            g.drawString(opt2Text, opt2X, optionsY);
 
         } else {
             // רמז להמשך דיאלוג
@@ -180,7 +188,6 @@ public class InteractiveDialogueBox {
     public int getFinalChoice() { return finalChoice; }
     public void resetChoice() { finalChoice = -1; }
     public boolean isReady() {
-        // התיבה מוכנה רק אם היא לא מראה כלום כרגע, והטיימר סיים לספור לאחור
         return !visible && cooldownTimer <= 0;
     }
 }

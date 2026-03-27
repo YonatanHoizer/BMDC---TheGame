@@ -3,17 +3,21 @@ package world;
 import engine.AudioManager;
 import engine.Camera;
 import engine.InputManager;
+import entities.Entity;
 import entities.NPC;
 import entities.Player;
 import hud.HUD;
+import hud.InteractiveDialogueBox;
+import npcs.Sanans;
 import story.GameState;
 import story.StoryManager;
 import story.StoryState;
 import ui.GameScreen;
 import util.Rect;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,22 +30,34 @@ public class GameWorld {
     private Map map;
     private Player player;
     private List<NPC> npcs;
+    private List<Entity> entities;
     private InputManager currentInput;
+    private NPC creator;
     public AudioManager audio = new AudioManager();
 
     // ===== Story =====
     private StoryManager storyManager;
     private GameState activeState;
+    private Sanans sanans;
 
     // ===== HUD =====
     private HUD hud;
 
+    private Entity Zoro;
+    private Entity CanVendingMachine;
+    private Entity SnackVendingMachine;
+    private boolean isWorldDialogueActive = false;
+    private boolean isTakedToCreator = false;
+
     public GameWorld(Player player) {
         this.map = new Map();
         this.player = player;
+        this.entities = new ArrayList<>();
         this.npcs = new ArrayList<>();
 
         this.audio.loadSound("notification", "/sounds/notification2.wav");
+        this.audio.loadSound("צעדים","/sounds/צעדים.wav");
+        this.audio.setVolume("צעדים",0.8F);
         this.player.setAudioManager(this.audio);
 
         // אתחול HUD
@@ -49,7 +65,37 @@ public class GameWorld {
 
         // אתחול StoryManager והסצנה הראשונה
         storyManager = new StoryManager(this);
-        activeState = storyManager.startStory(StoryState.LUNCH);
+        activeState = storyManager.startStory(StoryState.DORMITORY);
+
+        try {
+            BufferedImage canImg = ImageIO.read(getClass().getResourceAsStream("/images/can machine.png"));
+            // עכשיו מעבירים את התמונה לבנאי
+            CanVendingMachine = new Entity(49 * 64 - 30, 36 * 64, 96, 128, canImg);
+            entities.add(CanVendingMachine);
+        } catch (Exception e) {
+            System.out.println("Error loading can machine image!");
+        }
+
+        try {
+            BufferedImage snackImg = ImageIO.read(getClass().getResourceAsStream("/images/snack machine.png"));
+            // עכשיו מעבירים את התמונה לבנאי
+            SnackVendingMachine = new Entity(47 * 64 + 3, 36 * 64, 96, 128, snackImg);
+            entities.add(SnackVendingMachine);
+        } catch (Exception e) {
+            System.out.println("Error loading snack machine image!");
+        }
+
+        try {
+            BufferedImage zoroImg = ImageIO.read(getClass().getResourceAsStream("/images/zoro.png"));
+            // עכשיו מעבירים את התמונה לבנאי
+            Zoro = new Entity(50 * 64,1 * 64, 64, 64, zoroImg);
+            entities.add(Zoro);
+        } catch (Exception e) {
+            System.out.println("Error loading zoro image!");
+        }
+
+        creator = new NPC(43 * 64,54 * 64,64,64,6,4);
+        this.addNPC(creator);
     }
 
     // ================= UPDATE =================
@@ -65,12 +111,66 @@ public class GameWorld {
         for (NPC npc : npcs) {
             npc.update(this);
         }
+
+        handleStaticNpcDialogues(player);
+
         //עידכון השלבים
         if (storyManager != null) {
             storyManager.update(deltaTime);
         }
 
         //System.out.println("x = " + ((int)player.getX())/64 + " ,y = " + ((int)player.getY())/64);
+    }
+
+    private void handleStaticNpcDialogues(Player player) {
+        InteractiveDialogueBox dBox = this.getHUD().getDialogueBox();
+
+        // 1. קודם כל, נבדוק אם יש דיאלוג פתוח כלשהו
+        // (שים לב: צריך להיות לך גטר בשחקן שאומר אם הוא בשיחה)
+        if (player.isInDialogue()) {
+            // אם אנחנו (העולם) פתחנו את הדיאלוג, והתיבה נסגרה - נשחרר את השחקן
+            if (isWorldDialogueActive && !dBox.isVisible()) {
+                player.setInDialogue(false);
+                isWorldDialogueActive = false;
+            }
+            // בכל מקרה, אם השחקן בדיאלוג (שלנו או של העלילה), לא נאפשר דיאלוג חדש!
+            return;
+        }
+
+        // 2. רק אם השחקן פנוי, נבדוק אינטראקציות לפי סדר (else if מונע כפילויות)
+        if (player.getDistanceSquared(Zoro) < (64 * 64)) {
+            if (this.getInput().E_key && dBox.isReady()) {
+                startWorldDialogue(player, dBox, List.of("אני חושב שהלכתי לאיבוד..."));
+            }
+        }
+        else if (player.getDistanceSquared(CanVendingMachine) < (96 * 96)) {
+            if (this.getInput().E_key && dBox.isReady()) {
+                List<String> lines = new ArrayList<>();
+                lines.add("הכנסת 6 שקל בשביל פחית קולה..");
+                lines.add("המכונה בלעה אותם, העיקר כתוב 'עין רואה' וכו'");
+                startWorldDialogue(player, dBox, lines);
+            }
+        }
+        else if (player.getDistanceSquared(SnackVendingMachine) < (96 * 96)) {
+            if (this.getInput().E_key && dBox.isReady()) {
+                startWorldDialogue(player, dBox, List.of("אתה מחליט לא לנסות את מזלך שנית."));
+            }
+        }
+        else if (player.getDistanceSquared(creator) < (64 * 64)) {
+            if (this.getInput().E_key && dBox.isReady()) {
+                if (!isTakedToCreator){
+                    this.getHUD().showTopMessage("נראה שהוא בונה משחק על הישיבה ,עדיף לתת לו לסיים בשקט",8.0);
+                    isTakedToCreator = true;
+                }
+            }
+        }
+    }
+
+    // פונקציית עזר קטנה שעושה סדר וחוסכת שכפול קוד:
+    private void startWorldDialogue(Player player, InteractiveDialogueBox dBox, List<String> text) {
+        player.setInDialogue(true);
+        isWorldDialogueActive = true;
+        dBox.startDialogue(text);
     }
 
     // ================= MOVEMENT / COLLISION =================
@@ -113,6 +213,11 @@ public class GameWorld {
 
         for (NPC npc : npcs) {
             npc.Render(g);
+        }
+        creator.Render(g);
+
+        for (Entity entity : entities) {
+            entity.Render(g);
         }
 
         player.Render(g);

@@ -2,6 +2,7 @@ package story;
 
 import ai.ChaseAI;
 import ai.MovementAI;
+import ai.PatrolAI;
 import ai.ScriptedMovementAI;
 import entities.Entity;
 import entities.NPC;
@@ -43,6 +44,7 @@ public class DiningHallEvent extends GameState {
 
     // רשימת ה-NPCs בחדר האוכל (כדי לנקות בסוף)
     private List<NPC> diningNPCs = new ArrayList<>();
+    private boolean isTalkingToStatic = false;
 
     private enum Phase {
         IN_DINING_HALL,
@@ -60,27 +62,46 @@ public class DiningHallEvent extends GameState {
     }
 
     @Override
-        public void onEnter(GameWorld world) {
-            phase = Phase.IN_DINING_HALL;
-            completed = false;
-            timeInDiningHall = 0;
+    public void onEnter(GameWorld world) {
+        phase = Phase.IN_DINING_HALL;
+        completed = false;
+        timeInDiningHall = 0;
 
-            try {
-                BufferedImage milkImg = ImageIO.read(getClass().getResourceAsStream("/images/milk.png"));
-                // עכשיו מעבירים את התמונה לבנאי
-                Milk = new Entity(21 * 64, 2 * 64, 64, 64, milkImg);
-            } catch (Exception e) {
-                System.out.println("Error loading milk image!");
-            }
-            // יצירת עקיבא בשביל (נניח מחוץ לחדר האוכל)
-            akiva = new Akiva(3 * 64, 7 * 64, 64, 64);
-            akivaAI = ScriptedMovementAI.createDiningHallAkivaAI();
-            akiva.setMovementAI(akivaAI);
-            world.addNPC(akiva);
+        world.audio.loadSound("חדר אוכל", "/sounds/חדר אוכל סאונד.wav");
+        world.audio.loadSound("חדר אוכל יציאה", "/sounds/חדר אוכל סאונד יציאה.wav");
+        world.audio.loadSound("עקיבא מרדף", "/sounds/עקיבא מרדף.wav");
+        world.audio.loop("חדר אוכל");
 
-        // כאן תוכל להוסיף את שאר ה-NPCs שיושבים ומסתובבים בחדר האוכל בלולאה
-        // ולדחוף אותם לתוך diningNPCs...
+        try {
+            BufferedImage milkImg = ImageIO.read(getClass().getResourceAsStream("/images/חלב.png"));
+            // עכשיו מעבירים את התמונה לבנאי
+            Milk = new Entity(21 * 64, 2 * 64 - 10, 64, 64, milkImg);
+        } catch (Exception e) {
+            System.out.println("Error loading milk image!");
+        }
+        // יצירת עקיבא בשביל (נניח מחוץ לחדר האוכל)
+        akiva = new Akiva(3 * 64, 7 * 64, 64, 64);
+        akivaAI = ScriptedMovementAI.createDiningHallAkivaAI();
+        akiva.setMovementAI(akivaAI);
+        world.addNPC(akiva);
+
+        diningNPCs.add(new NPC(35 * 64,2 * 64,64,64,1,1));
+        diningNPCs.add(new NPC(22 * 64,10 * 64,64,64,3,4));
+        diningNPCs.add(new NPC(25 * 64,11* 64,64,64,5,1));
+        diningNPCs.add(new NPC(19 * 64,11* 64,64,64,4,1));
+        diningNPCs.add(new NPC(20 * 64,8 * 64,64,64,3,1));
+        diningNPCs.add(new NPC(28 * 64,4 * 64,64,64,4,1));
+        diningNPCs.add(new NPC(23 * 64,14* 64,64,64,2,1));
+        for (NPC npc: diningNPCs){
+            npc.setMovementAI(new PatrolAI(diningHall));
+            world.addNPC(npc);
+        }
+        diningNPCs.get(0).setAlert(true);
+        diningNPCs.get(0).setMovementAI(null);
+        diningNPCs.get(1).setAlert(true);
+        diningNPCs.get(1).setMovementAI(null);
     }
+
 
     @Override
     public void update(GameWorld world) {
@@ -106,6 +127,7 @@ public class DiningHallEvent extends GameState {
 
     private void handleDiningHallPhase(GameWorld world) {
         InteractiveDialogueBox dBox = world.getHUD().getDialogueBox();
+        InteractiveDialogueBox dBox1 = world.getHUD().getDialogueBox();
         timeInDiningHall += deltaTime;
 
         if (milkInteractionCooldown > 0) {
@@ -158,9 +180,34 @@ public class DiningHallEvent extends GameState {
             }
         }
 
+        if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(diningNPCs.get(0)) < (64 * 64)) {
+            if (world.getInput().E_key && dBox1.isReady()) {
+                world.getPlayer().setInDialogue(true);
+                isTalkingToStatic = true;
+                diningNPCs.get(0).setAlert(false);
+                dBox1.startDialogue(List.of("שמע בדרך כלל יש פה לפחות קרונפלקס..."));
+            }
+        }
+
+        if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(diningNPCs.get(1)) < (64 * 64)) {
+            if (world.getInput().E_key && dBox1.isReady()) {
+                world.getPlayer().setInDialogue(true);
+                isTalkingToStatic = true;
+                diningNPCs.get(1).setAlert(false);
+                dBox1.startDialogue(List.of("למישהוא לא היה כוח לצייר כיסאות כנראה"));
+            }
+        }
+
+        if (isTalkingToStatic && !dBox.isVisible()) {
+            world.getPlayer().setInDialogue(false);
+            isTalkingToStatic = false;
+        }
+
         // 4. יציאה מחדר האוכל (מתחילים ללכת בשביל)
         if (!diningHall.contains(px, py) && sederMessageReceived) {
             phase = Phase.ON_PATH;
+            world.audio.stop("חדר אוכל");
+            world.audio.play("חדר אוכל יציאה");
         }
     }
 
@@ -179,7 +226,8 @@ public class DiningHallEvent extends GameState {
             phase = Phase.AKIVA_CHASING;
             akiva.setMovementAI(null);
             world.getHUD().showTopMessage("עקיבא קלט אותך!", 2.0);
-            // אפשר להוסיף פה סאונד של מתח/מרדף!
+            world.audio.loop("עקיבא מרדף");
+            world.getPlayer().setSpeed(250.0f);
         }
     }
 
@@ -190,8 +238,9 @@ public class DiningHallEvent extends GameState {
 
         // אם תפס אותנו - עוברים לחקירה
         if (akiva.hasCaughtPlayer(world.getPlayer())) {
-            akiva.calmDown(); // <--- התיקון הקריטי! מכבה את ה-AI של המרדף ועוצר אותו
+            akiva.calmDown();
             phase = Phase.AKIVA_INTERROGATION;
+            world.audio.stop("עקיבא מרדף");
         }
     }
 
@@ -204,23 +253,22 @@ public class DiningHallEvent extends GameState {
             isAkivaDialogueActive = true;
 
             dBox.startDialogueWithChoice(
-                    "עצור מיד! ראיתי שלקחת משהו מחדר האוכל. גנבת חלב?!",
-                    "זה מים קרים",
-                    "אהה... כן, מצטער"
+                    "זה נראה שאתה מחביא משהוא בחולצה , זה לא חלב נכון?!",
+                    "חנוך ביקש ממני להביא אחד לפינת קפה",
+                    "אהה... כן, רציתי לקחת אחד לחדר"
             );
         }
 
-        // 2. מחכים לתשובה של השחקן (שמנו לב שזה Ready ולא רק visible)
-        if (isAkivaDialogueActive && dBox.isReady()) { // <--- תיקון לטיימר ההתקררות!
+        if (isAkivaDialogueActive && dBox.isReady()) {
             int choice = dBox.getFinalChoice();
             if (choice != -1) {
                 if (choice == 0) {
                     // התשובה הנכונה
-                    dBox.startDialogue(List.of("מים קרים אה? בסדר, אבל שאני לא אתפוס אותך פעם הבאה. סע לבית מדרש."));
+                    dBox.startDialogue(List.of("אה לפינת קפה, טוב בסדר אם חנוך ביקש..."));
                     hasMilk = false;
                     akivaDismissing = true;
-                    // לא צריך akiva.setAlert(false) כי calmDown כבר עשה את זה :)
                 } else if (choice == 1) {
+                    world.audio.stopAll();
                     fail(3);
                 }
 
@@ -229,8 +277,7 @@ public class DiningHallEvent extends GameState {
             }
         }
 
-        // 3. מחכים שההודעה האחרונה של עקיבא תסתיים (שוב, עם isReady להגנה מספאם)
-        if (akivaDismissing && dBox.isReady()) { // <--- תיקון!
+        if (akivaDismissing && dBox.isReady()) {
             world.getPlayer().setInDialogue(false);
 
             // מחזירים לעקיבא את הפטרול הרגיל שלו!
@@ -238,13 +285,13 @@ public class DiningHallEvent extends GameState {
             akiva.setMovementAI(ScriptedMovementAI.createDiningHallAkivaAI());
             phase = Phase.ON_PATH;
             akivaDismissing = false;
+            world.getPlayer().setSpeed(350.0f);
         }
     }
 
     private void finishEvent() {
         completed = true;
         phase = Phase.FINISHED;
-        System.out.println("סיום שלב חדר האוכל - מעבר לסדר בוקר.");
     }
 
     @Override
@@ -260,9 +307,8 @@ public class DiningHallEvent extends GameState {
 
     @Override
     public void render(Graphics2D g) {
-        // בודקים שהחלב קיים (עוד לא נלקח על ידי השחקן)
         if (Milk != null) {
-            Milk.Render(g); // קוראים לפעולת הציור המקורית של Entity!
+            Milk.Render(g);
         }
     }
 }

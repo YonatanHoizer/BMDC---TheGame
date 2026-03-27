@@ -35,30 +35,35 @@ public class NPC extends MovableEntity {
         String npcType3 = "";
         try {
             switch (index){
-                case 0:
+                case 1:
                     npcType1 = "/images/בלונדיני קדימה.png";
                     npcType2 = "/images/בלונדיני אחורה.png";
                     npcType3 = "/images/בלונדיני צד.png";
                     break;
-                case 1:
-                    npcType1 = "/images/טראמפ קדימה.png";
-                    npcType2 = "/images/טראמפ אחורה.png";
-                    npcType3 = "/images/טראמפ צד.png";
-                    break;
                 case 2:
+                    npcType1 = "/images/חום קדימה.png";
+                    npcType2 = "/images/חום אחורה.png";
+                    npcType3 = "/images/חום צד.png";
+                    break;
+                case 3:
                     npcType1 = "/images/ג'ינג'י קדימה.png";
                     npcType2 = "/images/ג'ינג'י אחורה.png";
                     npcType3 = "/images/ג'ינג'י צד.png";
                     break;
-                case 3:
+                case 4:
                     npcType1 = "/images/שחור קדימה.png";
                     npcType2 = "/images/שחור אחורה.png";
                     npcType3 = "/images/שחור צד.png";
                     break;
-                case 4:
-                    npcType1 = "/images/player-front.png";
-                    npcType2 = "/images/player-back.png";
-                    npcType3 = "/images/player-side.png";
+                case 5:
+                    npcType1 = "/images/צול קדימה.png";
+                    npcType2 = "/images/צול אחורה.png";
+                    npcType3 = "/images/צול צד.png";
+                    break;
+                case 6:
+                    npcType1 = "/images/רגיל קדימה.png";
+                    npcType2 = "/images/רגיל אחורה.png";
+                    npcType3 = "/images/רגיל צד.png";
                     break;
             }
 
@@ -68,8 +73,8 @@ public class NPC extends MovableEntity {
 
             // חיתוך האנימציות (זהה ללוגיקה של השחקן)
             walkDown = new BufferedImage[] {
-                    frontSheet.getSubimage(0, 64, 64, 64),
-                    frontSheet.getSubimage(0, 128, 64, 64)
+                    frontSheet.getSubimage(0, 0, 64, 64),
+                    frontSheet.getSubimage(0, 64, 64, 64)
             };
 
             walkUp = new BufferedImage[] {
@@ -144,6 +149,35 @@ public class NPC extends MovableEntity {
 
     public void setAlert(boolean value) {
         alert = value;
+    }
+
+    public void setFirstPosition(int position) {
+        this.firstPosition = position;
+
+        // הגנה: אם האנימציות עדיין לא נטענו, אל תנסה להחליף תמונה
+        if (walkDown == null || walkUp == null || walkLeft == null || walkRight == null) {
+            return;
+        }
+
+        // חובה לעדכן גם את התמונה (sprite) וגם את מחרוזת הכיוון (direction)!
+        switch (position) {
+            case 1:
+                this.direction = "DOWN";
+                this.sprite = walkDown[0];
+                break;
+            case 2:
+                this.direction = "LEFT";
+                this.sprite = walkLeft[0];
+                break;
+            case 3:
+                this.direction = "RIGHT";
+                this.sprite = walkRight[0];
+                break;
+            case 4:
+                this.direction = "UP";
+                this.sprite = walkUp[0];
+                break;
+        }
     }
 
     public boolean isAlert() {

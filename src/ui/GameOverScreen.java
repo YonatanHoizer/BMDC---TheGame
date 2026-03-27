@@ -42,12 +42,14 @@ public class GameOverScreen extends Screen {
                 failMessage = "כנות לא מעניית את עקיבא בשיט...";
                 break;
             case 4:
-                failMessage = "הרב מילר תפס אותך אם טלפון בבית מדרש";
+                failMessage = "הרב מילר תפס אותך עם טלפון בבית מדרש";
                 break;
             case 5:
                 failMessage = "הרב קרוייזר תפס אותך אחרי שלא הגעת לשיעור שלו";
                 break;
-            // תוסיף כאן את שאר הפסילות...
+            case 6:
+                failMessage = "איי איי איי , כול כך קרובבב";
+                break;
             default:
                 failMessage = "נפסלת! נסה שנית.";
                 break;

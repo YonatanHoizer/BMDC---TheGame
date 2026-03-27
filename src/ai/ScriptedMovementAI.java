@@ -75,14 +75,29 @@ public class ScriptedMovementAI implements MovementAI {
     public static ScriptedMovementAI createDormitorySanansAI() {
         List<MovementStep> steps = new ArrayList<>();
 
-        steps.add(new MovementStep(14 * 64, 47 * 64));
-        steps.add(new MovementStep(2.5f));
+        steps.add(new MovementStep(12 * 64, 47 * 64));
+        steps.add(new MovementStep(2f));
+        steps.add(new MovementStep(12 * 64, 42 * 64));
+        steps.add(new MovementStep(2f));
+        steps.add(new MovementStep(12 * 64, 47 * 64));
+        steps.add(new MovementStep(2f));
         steps.add(new MovementStep(20 * 64, 47 * 64));
-        steps.add(new MovementStep(2.5f));
+        steps.add(new MovementStep(2f));
         steps.add(new MovementStep(20 * 64, 53 * 64));
-        steps.add(new MovementStep(2.5f));
+        steps.add(new MovementStep(2f));
         steps.add(new MovementStep(20 * 64,47 * 64));
 
+        return new ScriptedMovementAI(steps);
+    }
+
+    public static ScriptedMovementAI createDormitorySanansAI3() {
+        List<MovementStep> steps = new ArrayList<>();
+
+        steps.add(new MovementStep(12 * 64, 47 * 64));
+        steps.add(new MovementStep(21 * 64, 47 * 64));
+        steps.add(new MovementStep(3.0f));
+        steps.add(new MovementStep(21 * 64, 42 * 64));
+        steps.add(new MovementStep(5.0f));
         return new ScriptedMovementAI(steps);
     }
 
@@ -90,7 +105,7 @@ public class ScriptedMovementAI implements MovementAI {
         List<MovementStep> steps = new ArrayList<>();
 
         steps.add(new MovementStep(21 * 64, 47 * 64));
-        steps.add(new MovementStep(5.0f));
+        steps.add(new MovementStep(3.0f));
         steps.add(new MovementStep(21 * 64, 42 * 64));
         steps.add(new MovementStep(5.0f));
         return new ScriptedMovementAI(steps);
@@ -115,7 +130,8 @@ public class ScriptedMovementAI implements MovementAI {
         steps.add(new MovementStep(27 * 64, 22 * 64));
         steps.add(new MovementStep(41 * 64, 22 * 64));
         steps.add(new MovementStep(41 * 64, 29 * 64));
-        steps.add(new MovementStep(37 * 64, 29 * 64));
+        steps.add(new MovementStep(38 * 64, 29 * 64));
+        steps.add(new MovementStep(38 * 64, 32 * 64));
         steps.add(new MovementStep(37 * 64, 32 * 64));
         steps.add(new MovementStep(37 * 64, 31 * 64));
         return new ScriptedMovementAI(steps);
@@ -123,7 +139,7 @@ public class ScriptedMovementAI implements MovementAI {
 
     public static ScriptedMovementAI KroyzerGetOutOfClassAI () {
         List<MovementStep> steps = new ArrayList<>();
-        steps.add(new MovementStep(40 * 64, 30 * 64));
+        steps.add(new MovementStep(41 * 64, 30 * 64));
 
         return new ScriptedMovementAI(steps);
     }

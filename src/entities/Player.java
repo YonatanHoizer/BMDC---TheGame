@@ -18,6 +18,7 @@ public class Player extends MovableEntity {
     private int unreadCount = 0;
     private boolean inDialogue = false;
     private AudioManager audio;
+    private boolean isWalkingSoundPlaying = false;
 
     public Player(float x, float y) {
         super(x, y, 64, 64);
@@ -32,9 +33,9 @@ public class Player extends MovableEntity {
     private void loadAnimations() {
         try {
             // טעינת הקבצים המקוריים שלך
-            BufferedImage frontSheet = ImageIO.read(getClass().getResourceAsStream("/images/player-front.png"));
-            BufferedImage backSheet  = ImageIO.read(getClass().getResourceAsStream("/images/player-back.png"));
-            BufferedImage sideSheet  = ImageIO.read(getClass().getResourceAsStream("/images/player-side.png"));
+            BufferedImage frontSheet = ImageIO.read(getClass().getResourceAsStream("/images/רגיל קדימה.png"));
+            BufferedImage backSheet  = ImageIO.read(getClass().getResourceAsStream("/images/רגיל אחורה.png"));
+            BufferedImage sideSheet  = ImageIO.read(getClass().getResourceAsStream("/images/רגיל צד.png"));
 
             // השמה למערכים שירשנו מ-MovableEntity
             walkDown = new BufferedImage[] {
@@ -75,6 +76,28 @@ public class Player extends MovableEntity {
             togglePhone();
             currentScreen.resetEnterTimer();
         }
+
+        // ---- הוספנו את הקריאה לניהול קולות ההליכה ----
+        handleFootstepsSound();
+    }
+
+    // הפעולה החדשה שבודקת מתי להדליק ולכבות את סאונד הצעדים
+    private void handleFootstepsSound() {
+        if (this.audio == null) return;
+
+        // השחקן נחשב זז רק אם אחד מכיווני המהירות שלו שונה מאפס
+        boolean isMoving = (this.dx != 0 || this.dy != 0);
+
+        if (isMoving && !isWalkingSoundPlaying) {
+            // אם הוא זז והסאונד לא פועל, נפעיל אותו בלופ
+            this.audio.loop("צעדים");
+            isWalkingSoundPlaying = true;
+        }
+        else if (!isMoving && isWalkingSoundPlaying) {
+            // אם הוא עצר (או פתח טלפון/דיאלוג) והסאונד פועל, נעצור אותו מיד
+            this.audio.stop("צעדים");
+            isWalkingSoundPlaying = false;
+        }
     }
 
     private void handleMovement(InputManager input) {
@@ -98,6 +121,10 @@ public class Player extends MovableEntity {
     public void setInDialogue(boolean value) {
         this.inDialogue = value;
         if (inDialogue) stop();
+    }
+
+    public boolean isInDialogue(){
+        return this.inDialogue;
     }
 
     public void addMessage(String sender, String text) {

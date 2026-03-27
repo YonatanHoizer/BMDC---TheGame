@@ -28,8 +28,8 @@ public class GameScreen extends Screen {
         super(input);
         this.game = game;
 
-        //this.player = new Player(20 * 64,52 * 64); //תחילת משחק
-        this.player = new Player(17 * 64,5 * 64); //חדר אוכל
+        this.player = new Player(20 * 64,52 * 64); //תחילת משחק
+        //this.player = new Player(17 * 64,5 * 64); //חדר אוכל
         //this.player = new Player(5 * 64,32 * 64); //מול בית מדרש
 
         this.world = new GameWorld(player);
@@ -57,6 +57,10 @@ public class GameScreen extends Screen {
 
             // מחליפים את כל המסך של המשחק במסך הפסילה, ומעבירים לו את המספר
             game.setScreen(new GameOverScreen(game, input, reason));
+        }
+        else if (world.getStoryManager().getState() == StoryState.VICTORY) {
+            // השחקן ניצח! מעבירים אותו למסך הניצחון
+            game.setScreen(new victoryScreen(game, input));
         }
     }
 

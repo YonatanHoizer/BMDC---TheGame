@@ -14,7 +14,7 @@ public class Miller extends NPC {
     private MovementAI baseAI; // שומר את הפטרול הרגיל שלו כדי שיוכל לחזור אליו
 
     // טווחים ומהירויות של מילר
-    private final float DETECTION_RANGE = 400.0f;
+    private final float DETECTION_RANGE = 550.0f;
     private final float CATCH_RANGE = 60.0f;
     private final float NORMAL_SPEED = 150.0f;
     private final float CHASE_SPEED = 280.0f;
@@ -33,30 +33,65 @@ public class Miller extends NPC {
     private void loadMillerAnimationsByIndex(int position) {
         // שים לב לעדכן את הנתיבים בהתאם לתמונות האמיתיות של מילר
         String[] paths = {
-                "/images/שחור קדימה.png",
-                "/images/שחור אחורה.png",
-                "/images/שחור צד.png"
+                "/images/מילר קדימה.png",
+                "/images/מילר אחורה.png",
+                "/images/מילר צד א.png",
+                "/images/מילר צד ב.png",
+                "/images/מילר צד ג.png",
+                "/images/מילר צד ד.png"
         };
 
         try {
+            // טעינת הגיליונות הראשיים (קדימה ואחורה)
             BufferedImage frontSheet = ImageIO.read(getClass().getResourceAsStream(paths[0]));
             BufferedImage backSheet  = ImageIO.read(getClass().getResourceAsStream(paths[1]));
-            BufferedImage sideSheet  = ImageIO.read(getClass().getResourceAsStream(paths[2]));
 
-            walkDown  = new BufferedImage[] { frontSheet.getSubimage(0, 64, 64, 64), frontSheet.getSubimage(0, 128, 64, 64) };
-            walkUp    = new BufferedImage[] { backSheet.getSubimage(0, 0, 64, 64), backSheet.getSubimage(0, 64, 64, 64) };
-            walkRight = new BufferedImage[] { sideSheet.getSubimage(0, 0, 64, 64), sideSheet.getSubimage(64, 0, 64, 64) };
-            walkLeft  = new BufferedImage[] { sideSheet.getSubimage(0, 64, 64, 64), sideSheet.getSubimage(64, 64, 64, 64) };
+            // טעינת התמונות הבודדות של הצדדים
+            BufferedImage sideRight1 = ImageIO.read(getClass().getResourceAsStream(paths[2]));
+            BufferedImage sideRight2 = ImageIO.read(getClass().getResourceAsStream(paths[3]));
+            BufferedImage sideLeft1  = ImageIO.read(getClass().getResourceAsStream(paths[4]));
+            BufferedImage sideLeft2  = ImageIO.read(getClass().getResourceAsStream(paths[5]));
 
+            // --- חיתוך ושיבוץ האנימציות ---
+
+            // קדימה: בגלל שמחקת את ה-64 פיקסלים הריקים, אנחנו מתחילים לחתוך מ-0 ולא מ-64!
+            walkDown = new BufferedImage[] {
+                    frontSheet.getSubimage(0, 0, 64, 64),
+                    frontSheet.getSubimage(0, 64, 64, 64)
+            };
+
+            // אחורה נשאר אותו דבר
+            walkUp = new BufferedImage[] {
+                    backSheet.getSubimage(0, 0, 64, 64),
+                    backSheet.getSubimage(0, 64, 64, 64)
+            };
+
+            // צדדים: מכניסים את התמונות הבודדות ישירות למערך בלי לחתוך
+            walkRight = new BufferedImage[] { sideRight1, sideRight2 };
+            walkLeft  = new BufferedImage[] { sideLeft1, sideLeft2 };
+
+            // קביעת הכיוון והספראייט הראשוני בהתאם למיקום התחלתי
             switch (position) {
-                case 1 -> this.sprite = walkDown[0];
-                case 2 -> this.sprite = walkLeft[0];
-                case 3 -> this.sprite = walkRight[0];
-                case 4 -> this.sprite = walkUp[0];
+                case 1:
+                    this.direction = "DOWN";
+                    this.sprite = walkDown[0];
+                    break;
+                case 2:
+                    this.direction = "LEFT";
+                    this.sprite = walkLeft[0];
+                    break;
+                case 3:
+                    this.direction = "RIGHT";
+                    this.sprite = walkRight[0];
+                    break;
+                case 4:
+                    this.direction = "UP";
+                    this.sprite = walkUp[0];
+                    break;
             }
 
         } catch (Exception e) {
-            System.out.println("Error loading Miller textures: " + e.getMessage());
+            System.out.println("Error loading Sanans textures: " + e.getMessage());
         }
     }
 

@@ -32,7 +32,7 @@ public class SederEvent extends GameState {
     private boolean milkQuestActive = false;
     private boolean milkQuestCompleted = false;
     private boolean waitingToReturnToBeitMidrash = false;
-    private double YosefWaitTimer = 30.0;
+    private double YosefWaitTimer = 20.0;
     private NPC Yosef;
     private boolean isTalkingToYosef = false;
 
@@ -42,9 +42,14 @@ public class SederEvent extends GameState {
     // NPCs סטטיים לדיבור
     private NPC talkativeNpc1;
     private NPC talkativeNpc2;
+    private NPC npc1;
+    private NPC npc2;
+    private NPC npc3;
+    private NPC npc4;
     private boolean isTalkingToStatic = false;
 
-    private List<NPC> allSederNpcs = new ArrayList<>();
+    private List <NPC> allSederNpcs = new ArrayList<>();
+    private List <String> texst = new ArrayList<>();
 
     private enum Phase { LEARNING, FINISHED }
     private Phase phase = Phase.LEARNING;
@@ -52,7 +57,7 @@ public class SederEvent extends GameState {
     public SederEvent(Zone beitMidrash, Zone dormRoom, boolean playerHasMilk) {
         this.beitMidrash = beitMidrash;
         this.dormRoom = dormRoom;
-        this.playerHasMilk = playerHasMilk;
+        this.playerHasMilk = true;
     }
 
     @Override
@@ -60,10 +65,25 @@ public class SederEvent extends GameState {
         phase = Phase.LEARNING;
         completed = false;
 
-        //world.audio.loadSound("לימוד", "/sounds/beit_midrash_noise.wav");
-        //world.audio.loop("לימוד");
+        world.audio.loadSound("לימוד", "/sounds/בית מדרש סאונד.wav");
+        world.audio.loadSound("לימוד סיום", "/sounds/בית מדרש סאונד יציאה.wav");
+        world.audio.setVolume("לימוד",0.8F);
+        world.audio.loop("לימוד");
 
         world.getHUD().showTopMessage("הסדר התחיל! אסור שהרב מילר יראה אותך עם טלפון פתוח. שים עין איפה הוא מסתובב.",5.0);
+
+        texst.add("יוסף : אביאל אני חולה על הלחיים שלך");
+        texst.add("יפרח : @דהן תעיף אותו מהקבוצה");
+        texst.add("אלכס : (גיף מפגר כלשהוא של לאונרדו דקאפריו)");
+        texst.add("דהן : עזוב יפרח תן לו הוא צריך לפרוק פעם ב");
+        texst.add("אביאל : זה מעבר להצלה בשלב הזה");
+        texst.add("בינימין : (איזה קישור לאתר חדשות לא קיים בשביל כתבה בת שורה על הישיבה)");
+        texst.add("יוסף : *יוסף העיף את בינימין מהקבוצה*");
+        texst.add("יפרח : דיקטטורים צריכים ללמוד את הקבוצה הזאת..");
+        texst.add("חגאי : מזל טוב לבינון לכבוד יום ההולדת 27 שתחיה עד..");
+        texst.add("בינון : שחכתי מזה לגמרי");
+        texst.add("");
+        texst.add("");
 
         miller = new Miller(15 * 64, 30 * 64, 64, 64);
         miller.setMillerPatrolAI(new PatrolAI(beitMidrash));
@@ -74,14 +94,26 @@ public class SederEvent extends GameState {
             world.addNPC(Yosef);
         }
 
-        talkativeNpc1 = new NPC(12 * 64, 35 * 64, 64, 64, 1, 4);
-        talkativeNpc2 = new NPC(20 * 64, 35 * 64, 64, 64, 3, 4);
-        world.addNPC(talkativeNpc1);
-        world.addNPC(talkativeNpc2);
+        talkativeNpc1 = new NPC(15 * 64, 35 * 64, 64, 64, 2, 4);
+        talkativeNpc1.setAlert(true);
+        talkativeNpc2 = new NPC(28 * 64, 29 * 64, 64, 64, 4, 1);
+        talkativeNpc2.setAlert(true);
+        npc1 = new NPC(10 * 64, 30 * 64, 64, 64, 3, 4);
+        npc2 = new NPC(20 * 64, 33 * 64, 64, 64, 1, 4);
+        npc3 = new NPC(16 * 64, 30 * 64, 64, 64, 4, 4);
+        npc4 = new NPC(18 * 64, 29 * 64, 64, 64, 5, 4);
+        allSederNpcs.add(npc1);
+        allSederNpcs.add(npc2);
+        allSederNpcs.add(npc3);
+        allSederNpcs.add(npc4);
+        for (NPC npc : allSederNpcs){
+            npc.setMovementAI(new PatrolAI(beitMidrash));
+            world.addNPC(npc);
+        }
         allSederNpcs.add(talkativeNpc1);
         allSederNpcs.add(talkativeNpc2);
-
-        // כאן תוכל להוסיף את שאר ה-NPCs בבית המדרש...
+        world.addNPC(talkativeNpc1);
+        world.addNPC(talkativeNpc2);
     }
 
     @Override
@@ -91,6 +123,7 @@ public class SederEvent extends GameState {
 
         // 1. לוגיקת מילר - התקצרה לשורה אחת בלבד!
         if (miller.checkPhoneAndChase(player)) {
+            world.audio.stopAll();
             fail(4);}
 
         // 2. לוגיקת משימת החלב
@@ -103,12 +136,12 @@ public class SederEvent extends GameState {
         if (!isSederPaused) {
             sederDuration -= deltaTime;
 
-            if (messagesReceived < 10) {
+            if (!texst.isEmpty()) {
                 messageIntervalTimer -= deltaTime;
                 if (messageIntervalTimer <= 0) {
-                    messagesReceived++;
-                    player.addMessage("דרך חיים תלמידים", "הודעה חשובה מספר " + messagesReceived + " - כנסו לראות!");
+                    player.addMessage("דרך חיים תלמידים", texst.get(messagesReceived));
                     messageIntervalTimer = 8.0;
+                    messagesReceived ++;
                 }
             }
 
@@ -116,10 +149,12 @@ public class SederEvent extends GameState {
                 milkQuestTriggered = true;
                 milkQuestActive = true;
                 isSederPaused = true;
-                player.addMessage("יוסף משה", "אחי, יש מצב שאתה עולה רגע לחדר 3 בפנימייה ומביא לי את החלב? אני חייב נס קפה.");
+                player.addMessage("יוסף משה", "אחי, יש מצב שאתה עולה רגע לחדר הראשון בפנימייה ומביא לי את החלב?");
             }
 
             if (sederDuration <= 0) {
+                world.audio.stop("לימוד");
+                world.audio.play("לימוד סיום");
                 finishEvent();
             }
         }
@@ -131,11 +166,11 @@ public class SederEvent extends GameState {
         if (milkQuestActive) {
             YosefWaitTimer -= deltaTime;
 
-            if (player.getDistanceSquared(Yosef) < (80 * 80) && !isTalkingToYosef) {
+            if (player.getDistanceSquared(Yosef) < (64 * 64) && !isTalkingToYosef) {
                 if (world.getInput().E_key && !dBox.isVisible()) {
                     player.setInDialogue(true);
                     isTalkingToYosef = true;
-                    dBox.startDialogue(List.of("וואו תודה אחי! הצלת אותי עם החלב הזה. תחזור ללמוד."));
+                    dBox.startDialogue(List.of("אחלן תודה נסיך , אין עליך."));
                 }
             }
 
@@ -149,8 +184,10 @@ public class SederEvent extends GameState {
 
             if (YosefWaitTimer <= 0 && milkQuestActive) {
                 milkQuestActive = false;
-                player.addMessage("יוסף משה", "עזוב אחי, לא משנה, כבר הסתדרתי. תישאר בסדר.");
+                waitingToReturnToBeitMidrash = true;
+                player.addMessage("יוסף משה", "עזוב אחי, לא משנה, כבר הסתדרתי. נתחשבן אחר כך...");
                 isSederPaused = false;
+                texst.add(5,"יוסף : *יוסף העיף אותך מהקבוצה* ");
             }
         }
 
@@ -158,7 +195,6 @@ public class SederEvent extends GameState {
             if (beitMidrash.contains(player.getX(), player.getY())) {
                 waitingToReturnToBeitMidrash = false;
                 isSederPaused = false;
-                System.out.println("השחקן חזר משימת החלב - הטיימר ממשיך!");
             }
         }
     }
@@ -166,19 +202,21 @@ public class SederEvent extends GameState {
     private void handleStaticNpcDialogues(Player player, GameWorld world) {
         InteractiveDialogueBox dBox = world.getHUD().getDialogueBox();
 
-        if (!isTalkingToStatic && player.getDistanceSquared(talkativeNpc1) < (80 * 80)) {
+        if (!isTalkingToStatic && player.getDistanceSquared(talkativeNpc1) < (64 * 64)) {
             if (world.getInput().E_key && dBox.isReady()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
-                dBox.startDialogue(List.of("אל תפריע לי עכשיו, אני באמצע סוגיה קשה בבבא קמא."));
+                talkativeNpc1.setAlert(false);
+                dBox.startDialogue(List.of("אני מוכר 5 מיילי ב200 שקל , בא לך?"));
             }
         }
 
-        if (!isTalkingToStatic && player.getDistanceSquared(talkativeNpc2) < (80 * 80)) {
+        if (!isTalkingToStatic && player.getDistanceSquared(talkativeNpc2) < (64 * 64)) {
             if (world.getInput().E_key && dBox.isReady()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
-                dBox.startDialogue(List.of("שמע האיוונט החדש בקלאש פסיכי אחי, ראית איך ריילי שיחק?"));
+                talkativeNpc2.setAlert(false);
+                dBox.startDialogue(List.of("שמע האיוונט החדש בקלאש פסיכי אחי, ראית את הלייב של ריילי?"));
             }
         }
 
@@ -192,25 +230,13 @@ public class SederEvent extends GameState {
     private void finishEvent() {
         completed = true;
         phase = Phase.FINISHED;
-        System.out.println("הסדר נגמר בהצלחה!");
-    }
-
-    public List<NPC> getStudentsForClass() {
-        List<NPC> movingStudents = new ArrayList<>();
-        // ניקח למשל את 2 התלמידים הראשונים מהרשימה
-        if (allSederNpcs.size() >= 3) {
-            movingStudents.add(allSederNpcs.get(0));
-            movingStudents.add(allSederNpcs.get(1));
-            movingStudents.add(allSederNpcs.get(1));
-        }
-        return movingStudents;
     }
 
     @Override
     public void onExit(GameWorld world) {
-        world.audio.stop("לימוד");
 
         if (Yosef != null) world.removeNPC(Yosef);
+        texst.clear();
 
         world.getStoryManager().setStudentsForClass(this.allSederNpcs);
         world.getStoryManager().setMiller(this.miller);

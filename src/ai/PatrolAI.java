@@ -16,7 +16,7 @@ public class PatrolAI implements MovementAI {
     private float stuckCheckTimer = 0;
 
     private static final float ARRIVAL_RADIUS_SQ = 25f;
-    private static final float WAIT_TIME = 5.0f;
+    private static final float WAIT_TIME = 8.0f;
     private static final float STUCK_THRESHOLD = 0.5f; // אם לא זז חצי פיקסל בפרק זמן מסוים
     private static final float CHECK_INTERVAL = 0.1f;   // נבדוק כל חצי שנייה
 
