@@ -249,19 +249,19 @@ public class LunchEvent extends GameState {
         world.addNPC(sananes);
 
         // הוספת עוד קצת תלמידים שיתנו אווירה
-        NPC student1 = new NPC(25 * 64, 29 * 64, 64, 64, 1, 4);
-        NPC student2 = new NPC(21 * 64, 35 * 64, 64, 64, 2, 4);
-        student1.setAlert(false);
-        student2.setAlert(false);
-        finaleNpcs.add(student1);
-        finaleNpcs.add(student2);
-
         NPC MoveWorshipper1 = new NPC(17 * 64, 38 * 64, 64, 64, 4, 4);
         finaleNpcs.add(MoveWorshipper1);
         NPC MoveWorshipper2 = new NPC(19 * 64, 38 * 64, 64, 64, 5, 4);
         finaleNpcs.add(MoveWorshipper2);
         NPC MoveWorshipper3 = new NPC(22 * 64, 38 * 64, 64, 64, 4, 4);
         finaleNpcs.add(MoveWorshipper3);
+
+        NPC student1 = new NPC(25 * 64, 29 * 64, 64, 64, 1, 4);
+        NPC student2 = new NPC(21 * 64, 35 * 64, 64, 64, 2, 4);
+        student1.setAlert(false);
+        student2.setAlert(false);
+        finaleNpcs.add(student1);
+        finaleNpcs.add(student2);
 
         NPC worshipper   = new NPC(15 * 64, 32 * 64, 64, 64, 3, 4);
         finaleNpcs.add(worshipper);

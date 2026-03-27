@@ -48,7 +48,7 @@ public class GameOverScreen extends Screen {
                 failMessage = "הרב קרוייזר תפס אותך אחרי שלא הגעת לשיעור שלו";
                 break;
             case 6:
-                failMessage = "איי איי איי , כול כך קרובבב";
+                failMessage = "איי איי איי , כול כך קרובבב \n אם רק היית מקשיב יותר בשיעורים";
                 break;
             default:
                 failMessage = "נפסלת! נסה שנית.";

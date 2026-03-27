@@ -57,7 +57,7 @@ public class SederEvent extends GameState {
     public SederEvent(Zone beitMidrash, Zone dormRoom, boolean playerHasMilk) {
         this.beitMidrash = beitMidrash;
         this.dormRoom = dormRoom;
-        this.playerHasMilk = true;
+        this.playerHasMilk = playerHasMilk;
     }
 
     @Override
@@ -90,7 +90,7 @@ public class SederEvent extends GameState {
         world.addNPC(miller);
 
         if (playerHasMilk) {
-            Yosef = new NPC(10 * 64, 52 * 64, 64, 64, 2, 4);
+            Yosef = new NPC(12 * 64, 51 * 64, 64, 64, 2, 1);
             world.addNPC(Yosef);
         }
 

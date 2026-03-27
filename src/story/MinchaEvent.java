@@ -165,8 +165,11 @@ public class MinchaEvent extends GameState {
 
             // סיבוב כולם לכיוון השחקן!
             makeEveryoneFacePlayer(player);
-            for (NPC npc : finaleNpcs){
-                npc.setMovementAI(null);
+            for (int i = 0; i < finaleNpcs.size(); i++) {
+                if (i < 4){
+                    finaleNpcs.get(i).setMovementAI(null);
+                    finaleNpcs.get(i).stop();
+                }
             }
 
             // יצירת מסלול דינמי למילר - שילך עד לשחקן
@@ -211,6 +214,7 @@ public class MinchaEvent extends GameState {
             String[] q = questions[currentQuestionIndex];
 
             dBox.startDialogueWithChoice(q[0], q[1], q[2]);
+            world.audio.stop("מתח");
         }
 
         // בדיקת התשובה של השחקן
@@ -225,6 +229,7 @@ public class MinchaEvent extends GameState {
                     // תשובה נכונה!
                     dBox.startDialogue(List.of("... יפה. לפחות אתה לומד. תחזור למקום שלך."));
                     phase = Phase.RESOLUTION;
+                    world.audio.play("ניצחון");
                 } else {
                     // תשובה שגויה - פסילה!
                     world.audio.stopAll();
@@ -245,15 +250,17 @@ public class MinchaEvent extends GameState {
 
         // כשהדיאלוג של הניצחון מסתיים
         if (dBox.isReady() && !dBox.isVisible()) {
-            world.audio.stop("מתח");
             // מנגנים מוזיקת ניצחון פעם אחת (לא בלופ)
-            world.audio.play("ניצחון");
 
             miller.setMovementAI(new PatrolAI(beitMidrash));
-            finaleNpcs.get(0).setMovementAI(new PatrolAI(beitMidrash));
-            finaleNpcs.get(1).setMovementAI(new PatrolAI(beitMidrash));
-            finaleNpcs.get(2).setMovementAI(new PatrolAI(beitMidrash));
-            finaleNpcs.get(3).setMovementAI(new PatrolAI(beitMidrash));
+            for (int i = 0; i < finaleNpcs.size(); i++) {
+                world.addNPC(finaleNpcs.get(i));
+                if (i < 4){
+                    finaleNpcs.get(i).setSpeed(150);
+                    finaleNpcs.get(i).setMovementAI(new PatrolAI(beitMidrash));
+                }
+            }
+
 
             // משחררים את השחקן
             player.setInDialogue(false);
@@ -269,13 +276,14 @@ public class MinchaEvent extends GameState {
 
         // אחרי 5 שניות (כשההודעה למעלה נעלמת), מסיימים את השלב
         if (victoryTimer <= 0) {
-            finishEvent();
+            finishEvent(world);
         }
     }
 
-    private void finishEvent() {
+    private void finishEvent(GameWorld world) {
         completed = true;
         phase = Phase.FINISHED;
+        world.audio.stopAll();
     }
 
     // --- פעולת עזר: לגרום לכולם להסתכל על השחקן ---
@@ -309,5 +317,18 @@ public class MinchaEvent extends GameState {
     public void onExit(GameWorld world) {
         world.audio.stop("מתח");
         world.audio.stop("תפילה");
+        if (miller != null){
+            world.removeNPC(miller);
+        }
+        if (kroyzer != null){
+            world.removeNPC(kroyzer);
+        }
+        if (sanans != null){
+            world.removeNPC(sanans);
+        }
+        for (NPC npc :finaleNpcs){
+            world.removeNPC(npc);
+        }
+        finaleNpcs.clear();
     }
 }
