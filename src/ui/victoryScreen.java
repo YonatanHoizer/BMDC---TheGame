@@ -84,7 +84,7 @@ public class victoryScreen extends Screen {
             return;
         }
 
-        if (input.ENTER_key && canPressEnter()) {
+        if (input.E_key && canPressEnter()) {
             game.setScreen(new MainMenuScreen(game, input));
         }
     }

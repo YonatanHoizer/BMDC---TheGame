@@ -20,7 +20,7 @@ public class InteractiveDialogueBox {
     private int selectedOption = 0;
     private int finalChoice = -1; // -1 אומר שעוד לא נבחר כלום
 
-    // טיימר קטן למניעת דפדוף מהיר מדי (כמו שעשינו בטלפון)
+    // טיימר קטן למניעת דפדוף מהיר מדי
     private double inputTimer = 0;
     private final double INPUT_DELAY = 0.2;
 
@@ -28,20 +28,18 @@ public class InteractiveDialogueBox {
 
     // מידות
     private final int x = 350;
-    private final int y = 600;
-    private final int width = 580;
-    private final int height = 100;
+    private final int y = 550;
+    private final int width = 600;
+    private final int height = 150;
 
-    private final Font textFont = new Font("Arial", Font.BOLD, 18);
-    // הוקטן גודל הפונט של האופציות מ-22 ל-16
-    private final Font optionFont = new Font("Arial", Font.BOLD, 16);
+    private final Font textFont = new Font("Arial", Font.BOLD, 20);
+    private final Font optionFont = new Font("Arial", Font.BOLD, 20);
 
     public void update(double deltaTime) {
         if (inputTimer > 0) inputTimer -= deltaTime;
         if (cooldownTimer > 0) cooldownTimer -= deltaTime;
     }
 
-    // הפעלת דיאלוג רגיל (אפשר להעביר רשימה של שורות)
     public void startDialogue(List<String> lines) {
         this.pages = lines;
         this.currentPage = 0;
@@ -51,7 +49,6 @@ public class InteractiveDialogueBox {
         this.inputTimer = INPUT_DELAY;
     }
 
-    // הפעלת דיאלוג שדורש בחירה בסופו
     public void startDialogueWithChoice(String question, String option1, String option2) {
         this.pages = new ArrayList<>();
         this.pages.add(question);
@@ -59,7 +56,7 @@ public class InteractiveDialogueBox {
 
         this.isChoiceMode = true;
         this.options = new String[]{option1, option2};
-        this.selectedOption = 0; // ברירת מחדל: האופציה הראשונה
+        this.selectedOption = 0;
         this.finalChoice = -1;
 
         this.visible = true;
@@ -69,24 +66,24 @@ public class InteractiveDialogueBox {
     public void handleInput(InputManager input) {
         if (!visible || inputTimer > 0) return;
 
-        // אם אנחנו במצב בחירה
+        // במצב בחירה
         if (isChoiceMode && currentPage == pages.size() - 1) {
-            // ניווט ימינה ושמאלה בין האופציות
+            // ניווט ימינה ושמאלה
             if (input.A_key || input.D_key) {
                 selectedOption = (selectedOption == 0) ? 1 : 0;
                 inputTimer = INPUT_DELAY;
             }
             // אישור בחירה
-            if (input.E_key) {
+            if (input.Z_key) {
                 finalChoice = selectedOption;
-                visible = false; // סוגרים את התיבה
+                visible = false;
                 cooldownTimer = 0.5;
                 inputTimer = INPUT_DELAY;
             }
         }
-        // דיאלוג רגיל (מעבר לעמוד הבא)
+        // דיאלוג רגיל
         else {
-            if (input.E_key) {
+            if (input.Z_key) {
                 currentPage++;
                 if (currentPage >= pages.size()) {
                     visible = false;
@@ -108,47 +105,95 @@ public class InteractiveDialogueBox {
 
         String currentText = pages.get(currentPage);
 
-        // חישוב גובה זמין לטקסט (אם אנחנו במצב בחירה, נשאיר מקום למטה לאופציות)
+        // אם אנחנו במסך בחירה, שומרים אזור קבוע של 60 פיקסלים בתחתית לאופציות
         int availableTextHeight = height;
         if (isChoiceMode && currentPage == pages.size() - 1) {
-            availableTextHeight = height - 40;
+            availableTextHeight = height - 60;
         }
 
         g.setColor(Color.WHITE);
         g.setFont(textFont);
         drawCenteredMultiLineText(g, currentText, availableTextHeight);
 
-        // ציור אופציות בחירה (אם רלוונטי)
+        // ציור אופציות
         if (isChoiceMode && currentPage == pages.size() - 1) {
             g.setFont(optionFont);
-            FontMetrics optMetrics = g.getFontMetrics(optionFont);
-            int optionsY = y + height - 15; // מיקום האופציות בתחתית התיבה
 
-            // הרכבת המחרוזות עם החץ למי שמסומן
+            // אנחנו מחלקים את תחתית התיבה ל-2 אזורים וירטואליים
+            int boxHeight = 60; // גובה אזור האופציות
+            int boxY = y + height - boxHeight; // נקודת התחלה אנכית של אזור האופציות
+            int halfWidth = (width / 2) - 20; // רוחב מקסימלי לאופציה (חצי מהחלון פחות שוליים)
+
+            // אופציה 1 (צד ימין - אינדקס 0)
             String opt1Text = (selectedOption == 0 ? "> " : "") + options[0];
-            String opt2Text = (selectedOption == 1 ? "> " : "") + options[1];
-
-            // אופציה 1 (צד ימין - מיושר לימין התיבה דינמית)
             if (selectedOption == 0) g.setColor(Color.YELLOW);
             else g.setColor(Color.WHITE);
-            int opt1X = x + width - optMetrics.stringWidth(opt1Text) - 30; // 30 פיקסלים מהקיר הימני
-            g.drawString(opt1Text, opt1X, optionsY);
+            int opt1BoxX = x + (width / 2) + 10; // מתחיל מהאמצע וימינה
+            drawDynamicBlockOption(g, opt1Text, opt1BoxX, boxY, halfWidth, boxHeight);
 
-            // אופציה 2 (צד שמאל - מיושר לשמאל התיבה דינמית)
+            // אופציה 2 (צד שמאל - אינדקס 1)
+            String opt2Text = (selectedOption == 1 ? "> " : "") + options[1];
             if (selectedOption == 1) g.setColor(Color.YELLOW);
             else g.setColor(Color.WHITE);
-            int opt2X = x + 30; // 30 פיקסלים מהקיר השמאלי
-            g.drawString(opt2Text, opt2X, optionsY);
+            int opt2BoxX = x + 10; // מתחיל מהצד השמאלי ועד האמצע
+            drawDynamicBlockOption(g, opt2Text, opt2BoxX, boxY, halfWidth, boxHeight);
 
         } else {
-            // רמז להמשך דיאלוג
+            // רמז להמשך
             g.setFont(new Font("Arial", Font.BOLD, 12));
             g.setColor(Color.LIGHT_GRAY);
-            g.drawString("Press E ->", x + width - 120, y + height - 10);
+            g.drawString("Press Z ->", x + width - 120, y + height - 10);
         }
     }
 
-    // הפעולה המשופרת שלך, עכשיו מקבלת גם availableHeight כדי למרכז נכון
+    /**
+     * פונקציה חדשה וחכמה לציור אופציות.
+     * במקום ליישר כל שורה בנפרד, היא מחשבת את "בלוק" הטקסט, ממקמת אותו במרכז האזור המותר לו,
+     * ומתחילה את כל השורות מאותה נקודת X, כך שהשורה השנייה תמיד תהיה בדיוק מתחת לראשונה (ומתחת לחץ הבחירה).
+     */
+    private void drawDynamicBlockOption(Graphics2D g, String text, int boxX, int boxY, int boxWidth, int boxHeight) {
+        FontMetrics metrics = g.getFontMetrics();
+        int lineHeight = metrics.getHeight();
+
+        List<String> lines = new ArrayList<>();
+        String[] words = text.split(" ");
+        StringBuilder currentLine = new StringBuilder();
+
+        // חיתוך המילים לשורות לפי רוחב הקופסה המותר
+        for (String word : words) {
+            if (metrics.stringWidth(currentLine + word) <= boxWidth) {
+                currentLine.append(word).append(" ");
+            } else {
+                lines.add(currentLine.toString().trim());
+                currentLine = new StringBuilder(word + " ");
+            }
+        }
+        lines.add(currentLine.toString().trim());
+
+        // מציאת השורה הכי ארוכה בתוך הבלוק הזה ספציפית
+        int actualBlockWidth = 0;
+        for (String line : lines) {
+            int w = metrics.stringWidth(line);
+            if (w > actualBlockWidth) {
+                actualBlockWidth = w;
+            }
+        }
+
+        // חישוב הגובה הכולל של בלוק הטקסט (כמה שורות שנוצרו)
+        int blockHeight = lines.size() * lineHeight;
+
+        // חישוב נקודות ההתחלה כדי למרכז את הבלוק כולו במרכז התיבה המוקצית לו!
+        int startX = boxX + (boxWidth - actualBlockWidth) / 2;
+        int startY = boxY + (boxHeight - blockHeight) / 2 + metrics.getAscent();
+
+        // ציור כל השורות מאותו startX בדיוק - זה מונע את הבעיה של שורה בורחת
+        for (String line : lines) {
+            g.drawString(line, startX, startY);
+            startY += lineHeight;
+        }
+    }
+
+    // ציור הודעות הדיאלוג (השאלה עצמה)
     private void drawCenteredMultiLineText(Graphics2D g, String text, int availableHeight) {
         FontMetrics metrics = g.getFontMetrics(textFont);
         int lineHeight = metrics.getHeight();
@@ -171,7 +216,6 @@ public class InteractiveDialogueBox {
             finalLines.add(currentLine.toString().trim());
         }
 
-        // המרכוז האנכי מחושב לפי availableHeight במקום height
         int totalHeight = finalLines.size() * lineHeight;
         int startY = y + ((availableHeight - totalHeight) / 2) + metrics.getAscent();
 

@@ -72,7 +72,7 @@ public class Player extends MovableEntity {
         }
 
         // לוגיקת טלפון
-        if (input.ENTER_key && currentScreen.canPressEnter() && !inDialogue) {
+        if (input.X_key && currentScreen.canPressEnter() && !inDialogue) {
             togglePhone();
             currentScreen.resetEnterTimer();
         }
@@ -137,6 +137,10 @@ public class Player extends MovableEntity {
     }
 
     public boolean isPhoneOpen() { return phoneOpen; }
+
+    public void setPhoneOpen(boolean phoneOpen) {
+        this.phoneOpen = phoneOpen;
+    }
 
     public List<PhoneMessage> getPhoneMessages() { return phoneMessages; }
 

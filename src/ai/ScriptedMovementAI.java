@@ -129,7 +129,7 @@ public class ScriptedMovementAI implements MovementAI {
         steps.add(new MovementStep(27 * 64, 25 * 64));
         steps.add(new MovementStep(27 * 64, 22 * 64));
         steps.add(new MovementStep(41 * 64, 22 * 64));
-        steps.add(new MovementStep(41 * 64, 29 * 64));
+        steps.add(new MovementStep(41 * 64, 28 * 64));
         steps.add(new MovementStep(38 * 64, 29 * 64));
         steps.add(new MovementStep(38 * 64, 32 * 64));
         steps.add(new MovementStep(37 * 64, 32 * 64));

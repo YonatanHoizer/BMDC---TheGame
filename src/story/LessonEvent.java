@@ -105,6 +105,8 @@ public class LessonEvent extends GameState {
         world.addNPC(classNpc6);
         world.addNPC(classNpc7);
         world.addNPC(classNpc8);
+
+        world.getHUD().showTimer("זמן לכניסה לכיתה", 15);
     }
 
     @Override
@@ -141,6 +143,7 @@ public class LessonEvent extends GameState {
         // 1. השחקן נכנס לכיתה בזמן
         if (classroom.contains(player.getX(), player.getY())) {
             phase = Phase.IN_CLASS;
+            world.getHUD().hideTimer();
             world.getHUD().showTopMessage("הרב קרויזר: 'ברוך הבא, שב במקומך בבקשה.'", 4.0);
             return;
         }
@@ -148,6 +151,7 @@ public class LessonEvent extends GameState {
         // 2. השחקן איחר - מתחיל מרדף!
         if (timeToEnterClass <= 0) {
             phase = Phase.KROIZER_CHASE;
+            world.getHUD().hideTimer();
             world.getHUD().showTopMessage("איחרת לשיעור! קרויזר בעקבותיך. שרוד 20 שניות!", 4.0);
             kroyzer.startChase(player);
             world.audio.loop("מרדף קרוייזר");

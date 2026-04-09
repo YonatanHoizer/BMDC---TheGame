@@ -60,6 +60,9 @@ public class GameWorld {
         this.audio.setVolume("צעדים",0.8F);
         this.player.setAudioManager(this.audio);
 
+        this.audio.loadSound("תיקתוק","/sounds/תיקתוק.wav");
+        this.audio.setVolume("תיקתוק", 0.8F);
+
         // אתחול HUD
         this.hud = new HUD(player);
 
@@ -113,6 +116,9 @@ public class GameWorld {
         }
 
         handleStaticNpcDialogues(player);
+        if (hud.shouldPlayTimerTick()) {
+            this.audio.play("תיקתוק");
+        }
 
         //עידכון השלבים
         if (storyManager != null) {
@@ -139,12 +145,12 @@ public class GameWorld {
 
         // 2. רק אם השחקן פנוי, נבדוק אינטראקציות לפי סדר (else if מונע כפילויות)
         if (player.getDistanceSquared(Zoro) < (64 * 64)) {
-            if (this.getInput().E_key && dBox.isReady()) {
+            if (this.getInput().Z_key && dBox.isReady()) {
                 startWorldDialogue(player, dBox, List.of("אני חושב שהלכתי לאיבוד..."));
             }
         }
         else if (player.getDistanceSquared(CanVendingMachine) < (96 * 96)) {
-            if (this.getInput().E_key && dBox.isReady()) {
+            if (this.getInput().Z_key && dBox.isReady()) {
                 List<String> lines = new ArrayList<>();
                 lines.add("הכנסת 6 שקל בשביל פחית קולה..");
                 lines.add("המכונה בלעה אותם, העיקר כתוב 'עין רואה' וכו'");
@@ -152,12 +158,12 @@ public class GameWorld {
             }
         }
         else if (player.getDistanceSquared(SnackVendingMachine) < (96 * 96)) {
-            if (this.getInput().E_key && dBox.isReady()) {
+            if (this.getInput().Z_key && dBox.isReady()) {
                 startWorldDialogue(player, dBox, List.of("אתה מחליט לא לנסות את מזלך שנית."));
             }
         }
         else if (player.getDistanceSquared(creator) < (64 * 64)) {
-            if (this.getInput().E_key && dBox.isReady()) {
+            if (this.getInput().Z_key && dBox.isReady()) {
                 if (!isTakedToCreator){
                     this.getHUD().showTopMessage("נראה שהוא בונה משחק על הישיבה ,עדיף לתת לו לסיים בשקט",8.0);
                     isTakedToCreator = true;

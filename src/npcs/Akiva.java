@@ -84,7 +84,7 @@ public class Akiva extends NPC {
             }
 
         } catch (Exception e) {
-            System.out.println("Error loading Sanans textures: " + e.getMessage());
+            System.out.println("Error loading Akiva textures: " + e.getMessage());
         }
     }
 

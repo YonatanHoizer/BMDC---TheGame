@@ -1,7 +1,5 @@
 package story;
 
-import ai.ChaseAI;
-import ai.MovementAI;
 import ai.PatrolAI;
 import ai.ScriptedMovementAI;
 import entities.Entity;
@@ -29,6 +27,7 @@ public class DiningHallEvent extends GameState {
     private boolean milkMissionReceived = false;
     private boolean sederMessageReceived = false;
     private double milkInteractionCooldown = 0;
+    private boolean OutsideOfDiningHall = false;
 
 
     // משימת החלב
@@ -110,6 +109,7 @@ public class DiningHallEvent extends GameState {
         switch (phase) {
             case IN_DINING_HALL:
                 handleDiningHallPhase(world);
+                handleOutsideOfDiningHall(world);
                 break;
             case ON_PATH:
                 handlePathPhase(world);
@@ -127,7 +127,6 @@ public class DiningHallEvent extends GameState {
 
     private void handleDiningHallPhase(GameWorld world) {
         InteractiveDialogueBox dBox = world.getHUD().getDialogueBox();
-        InteractiveDialogueBox dBox1 = world.getHUD().getDialogueBox();
         timeInDiningHall += deltaTime;
 
         if (milkInteractionCooldown > 0) {
@@ -136,7 +135,7 @@ public class DiningHallEvent extends GameState {
 
         // 1. הודעת בונוס לחלב (אחרי 20 שניות)
         if (timeInDiningHall >= 5 && !milkMissionReceived) {
-            world.getPlayer().addMessage("יוסף משה", "אחי, אתה בחדר אוכל? תעשה טובה תביא לי איזה קרטון חלב לחדר.");
+            world.getPlayer().addMessage("יוסף משה", "אחי, אתה בחדר אוכל?\n תעשה טובה תביא לי איזה קרטון חלב לחדר.");
             milkMissionReceived = true;
         }
 
@@ -154,8 +153,8 @@ public class DiningHallEvent extends GameState {
         if (Milk != null){
              nearMilk = (Math.abs(px - Milk.getX()) < 64 && Math.abs(py - Milk.getY()) < 64);
         }
-        if (milkMissionReceived && !hasMilk && !isMilkDialogueActive && nearMilk&& milkInteractionCooldown <= 0) {
-            if (world.getInput().E_key && !dBox.isVisible()) {
+        if (milkMissionReceived && !hasMilk && !isMilkDialogueActive && nearMilk && milkInteractionCooldown <= 0) {
+            if (world.getInput().Z_key && !dBox.isVisible()) {
                 world.getPlayer().setInDialogue(true);
                 isMilkDialogueActive = true;
                 dBox.startDialogueWithChoice("זה קרטון החלב פג תוקף כרגיל. לקחת אותו?", "כן, ברור", "לא, אסור לגנוב");
@@ -181,20 +180,20 @@ public class DiningHallEvent extends GameState {
         }
 
         if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(diningNPCs.get(0)) < (64 * 64)) {
-            if (world.getInput().E_key && dBox1.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
                 diningNPCs.get(0).setAlert(false);
-                dBox1.startDialogue(List.of("שמע בדרך כלל יש פה לפחות קרונפלקס..."));
+                dBox.startDialogue(List.of("שמע בדרך כלל יש פה לפחות קרונפלקס..."));
             }
         }
 
         if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(diningNPCs.get(1)) < (64 * 64)) {
-            if (world.getInput().E_key && dBox1.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
                 diningNPCs.get(1).setAlert(false);
-                dBox1.startDialogue(List.of("למישהוא לא היה כוח לצייר כיסאות כנראה"));
+                dBox.startDialogue(List.of("למישהוא לא היה כוח לצייר כיסאות כנראה"));
             }
         }
 
@@ -204,12 +203,37 @@ public class DiningHallEvent extends GameState {
         }
 
         // 4. יציאה מחדר האוכל (מתחילים ללכת בשביל)
-        if (!diningHall.contains(px, py) && sederMessageReceived) {
-            phase = Phase.ON_PATH;
-            world.audio.stop("חדר אוכל");
-            world.audio.play("חדר אוכל יציאה");
+        if (!diningHall.contains(px, py)) {
+            if (timeInDiningHall >= 25.0) {
+                phase = Phase.ON_PATH;
+                world.audio.stop("חדר אוכל");
+                world.audio.play("חדר אוכל יציאה");
+            }else {
+                if (!OutsideOfDiningHall){
+                    OutsideOfDiningHall = true;
+                    world.audio.stop("חדר אוכל");
+                    world.audio.play("חדר אוכל יציאה");
+                }
+            }
         }
     }
+
+    private void handleOutsideOfDiningHall(GameWorld world){
+        if (OutsideOfDiningHall){
+            float px = world.getPlayer().getX();
+            float py = world.getPlayer().getY();
+            if (diningHall.contains(px,py)){
+                world.audio.loop("חדר אוכל");
+                world.audio.stop("חדר אוכל יציאה");
+                OutsideOfDiningHall = false;
+            }
+            if (path.contains(px,py)){
+                fail(7);
+                world.audio.stopAll();
+            }
+        }
+    }
+
 
     private void handlePathPhase(GameWorld world) {
         float px = world.getPlayer().getX();
@@ -232,7 +256,6 @@ public class DiningHallEvent extends GameState {
     }
 
     private void handleAkivaChase(GameWorld world) {
-
         // עקיבא במרדף
         akiva.chasePlayer(world.getPlayer());
 

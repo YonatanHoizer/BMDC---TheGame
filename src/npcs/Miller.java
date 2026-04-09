@@ -91,7 +91,7 @@ public class Miller extends NPC {
             }
 
         } catch (Exception e) {
-            System.out.println("Error loading Sanans textures: " + e.getMessage());
+            System.out.println("Error loading miler textures: " + e.getMessage());
         }
     }
 

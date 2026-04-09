@@ -21,6 +21,7 @@ public class SederEvent extends GameState {
     // טיימרי סדר ראשיים
     private double sederDuration = 90.0;
     private boolean isSederPaused = false;
+    private double outOfSeder = 10.0;
 
     // מערכת הודעות פיתיון
     private double messageIntervalTimer = 8.0;
@@ -32,9 +33,10 @@ public class SederEvent extends GameState {
     private boolean milkQuestActive = false;
     private boolean milkQuestCompleted = false;
     private boolean waitingToReturnToBeitMidrash = false;
-    private double YosefWaitTimer = 20.0;
+    private double YosefWaitTimer = 24.0;
     private NPC Yosef;
     private boolean isTalkingToYosef = false;
+    private boolean isYosefMassegeSend = false;
 
     // מילר (עכשיו משתמש במחלקה שלו!)
     private Miller miller;
@@ -82,7 +84,7 @@ public class SederEvent extends GameState {
         texst.add("יפרח : דיקטטורים צריכים ללמוד את הקבוצה הזאת..");
         texst.add("חגאי : מזל טוב לבינון לכבוד יום ההולדת 27 שתחיה עד..");
         texst.add("בינון : שחכתי מזה לגמרי");
-        texst.add("");
+        texst.add("ינון : מישהוא מכיר ערוץ חדשות טוב בטלגרם?");
         texst.add("");
 
         miller = new Miller(15 * 64, 30 * 64, 64, 64);
@@ -149,7 +151,6 @@ public class SederEvent extends GameState {
                 milkQuestTriggered = true;
                 milkQuestActive = true;
                 isSederPaused = true;
-                player.addMessage("יוסף משה", "אחי, יש מצב שאתה עולה רגע לחדר הראשון בפנימייה ומביא לי את החלב?");
             }
 
             if (sederDuration <= 0) {
@@ -157,30 +158,55 @@ public class SederEvent extends GameState {
                 world.audio.play("לימוד סיום");
                 finishEvent();
             }
+
+            if (sederDuration <= 80.0){
+                if (!beitMidrash.contains(player.getX(),player.getY())){
+                    outOfSeder -= deltaTime;
+                    if (outOfSeder <= 0){
+                        world.audio.stopAll();
+                        fail(9);
+                    }
+                }else {
+                    if (outOfSeder != 10.0){
+                        outOfSeder = 10.0;
+                    }
+                }
+            }
         }
     }
 
     private void handleMilkQuestLogic(Player player, GameWorld world) {
         InteractiveDialogueBox dBox = world.getHUD().getDialogueBox();
-
         if (milkQuestActive) {
             YosefWaitTimer -= deltaTime;
 
+            if (YosefWaitTimer <= 20 && !isYosefMassegeSend){
+                player.addMessage("יוסף משה", "אחי, יש מצב שאתה עולה רגע לחדר הראשון בפנימייה ומביא לי את החלב?");
+                isYosefMassegeSend = true;
+            }
+
             if (player.getDistanceSquared(Yosef) < (64 * 64) && !isTalkingToYosef) {
-                if (world.getInput().E_key && !dBox.isVisible()) {
+                if (world.getInput().Z_key && !dBox.isVisible()) {
                     player.setInDialogue(true);
                     isTalkingToYosef = true;
-                    dBox.startDialogue(List.of("אחלן תודה נסיך , אין עליך."));
+                    dBox.startDialogueWithChoice("להביא ליוסף את החלב ?","כן","כן");
                 }
             }
 
-            if (isTalkingToYosef && !dBox.isVisible()) {
-                player.setInDialogue(false);
-                isTalkingToYosef = false;
-                milkQuestActive = false;
-                milkQuestCompleted = true;
-                waitingToReturnToBeitMidrash = true;
+            if (isTalkingToYosef && dBox.isReady()) {
+                if (dBox.getFinalChoice() != -1) {
+                    dBox.startDialogue(List.of("היידה , תודה אחי חולה עליך"));
+                    dBox.resetChoice();
+                }
+                else {
+                    player.setInDialogue(false);
+                    isTalkingToYosef = false;
+                    milkQuestActive = false;
+                    milkQuestCompleted = true;
+                    waitingToReturnToBeitMidrash = true;
+                }
             }
+
 
             if (YosefWaitTimer <= 0 && milkQuestActive) {
                 milkQuestActive = false;
@@ -203,7 +229,7 @@ public class SederEvent extends GameState {
         InteractiveDialogueBox dBox = world.getHUD().getDialogueBox();
 
         if (!isTalkingToStatic && player.getDistanceSquared(talkativeNpc1) < (64 * 64)) {
-            if (world.getInput().E_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
                 talkativeNpc1.setAlert(false);
@@ -212,11 +238,11 @@ public class SederEvent extends GameState {
         }
 
         if (!isTalkingToStatic && player.getDistanceSquared(talkativeNpc2) < (64 * 64)) {
-            if (world.getInput().E_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
                 talkativeNpc2.setAlert(false);
-                dBox.startDialogue(List.of("שמע האיוונט החדש בקלאש פסיכי אחי, ראית את הלייב של ריילי?"));
+                dBox.startDialogue(List.of("שמע האיוונט החדש בקלאש פסיכי אחי, ראית את הלייב של ריילי? \n הוא יצא בפוקס נגד אסף ,ואסף ניצח!!!"));
             }
         }
 

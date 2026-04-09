@@ -10,12 +10,14 @@ public class HUD {
     private PhoneUI phoneUI;
     private MassageBoxTop topMessageBox;
     private InteractiveDialogueBox dialogueBox;
+    private TimerUI timerUI;
 
     public HUD(Player player) {
         this.player = player;
         this.phoneUI = new PhoneUI(player);
         this.topMessageBox = new MassageBoxTop(5);
         this.dialogueBox = new InteractiveDialogueBox();
+        this.timerUI = new TimerUI();
     }
 
     public HUD(){
@@ -23,42 +25,70 @@ public class HUD {
         this.phoneUI = null;
         this.topMessageBox = new MassageBoxTop(0);
         this.dialogueBox = new InteractiveDialogueBox();
+        this.timerUI = new TimerUI();
     }
 
     public void update(double deltaTime) {
         topMessageBox.update(deltaTime);
         dialogueBox.update(deltaTime);
-        phoneUI.update(deltaTime);
+        timerUI.update(deltaTime);
+        // במקרה של בנאי ריק (בלי שחקן), צריך לבדוק שהטלפון לא null
+        if(phoneUI != null) {
+            phoneUI.update(deltaTime);
+        }
     }
 
     public void render(Graphics2D g) {
         phoneUI.render(g);
         topMessageBox.render(g);
         dialogueBox.render(g);
+        timerUI.render(g);
     }
 
     // --- מעטפת (Wrappers) לניהול הודעות ---
 
-    // הודעה בטלפון - אנחנו מעדכנים את השחקן, ה-UI כבר ימשוך את זה משם לבד
+    public void showTimer(String label, double seconds) {
+        timerUI.startTimer(label, seconds);
+    }
+
+    public void hideTimer() {
+        timerUI.stopAndHide();
+    }
+
+    public boolean isTimerDone() {
+        return timerUI.isTimeUp();
+    }
+
+    public double getTimerTimeLeft() {
+        return timerUI.getTimeLeft();
+    }
+
+    public boolean shouldPlayTimerTick() {
+        if (timerUI != null && timerUI.isVisible()) {
+            return timerUI.consumeTickSound();
+        }
+        return false;
+    }
+
+    // --- מעטפת (Wrappers) קיימים ---
+
     public void addPhoneMessage(String sender, String text) {
-        player.addMessage(sender, text);
+        if(player != null) player.addMessage(sender, text);
     }
 
-    // בדיקה אם הטלפון פתוח - שואלים את השחקן
     public boolean isPhoneOpen() {
-        return player.isPhoneOpen();
+        return player != null && player.isPhoneOpen();
     }
 
-    // הודעות מערכת/עולם - נשארות ב-HUD כי הן לא "מידע של השחקן"
-    public void showTopMessage(String text,double timer) {
-        topMessageBox.show(text,timer);
+    public void showTopMessage(String text, double timer) {
+        topMessageBox.show(text, timer);
     }
 
-    // חשוב: להעביר את הקלט ל-PhoneUI כדי שנוכל לדפדף בהודעות
     public void handleInput(InputManager input) {
-        phoneUI.handleInput(input);
+        if(phoneUI != null) phoneUI.handleInput(input);
         dialogueBox.handleInput(input);
     }
+
     public void setTopMessageBox(MassageBoxTop box) {
         this.topMessageBox = box;
     }
@@ -66,7 +96,7 @@ public class HUD {
         return this.topMessageBox;
     }
     public PhoneUI getPhoneUI() {
-        return this.phoneUI; // בהנחה שקראת למשתנה phoneUI
+        return this.phoneUI;
     }
     public void setPhoneUI(PhoneUI phoneUI) {
         this.phoneUI = phoneUI;
@@ -76,6 +106,9 @@ public class HUD {
     }
     public void setBottomMessageBox(InteractiveDialogueBox box) {
         this.dialogueBox = box;
+    }
+    public TimerUI getTimerUI() {
+        return this.timerUI;
     }
 }
 

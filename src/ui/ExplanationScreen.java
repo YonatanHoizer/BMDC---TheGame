@@ -37,10 +37,10 @@ public class ExplanationScreen extends Screen {
                 "לעבור יום בישיבה בלי להפקיד את הטלפון בבוקר.",
                 "",
                 "שליטה:",
-                "חצים או W,A,S,D - תנועת השחקן",
-                "E - אינטראקציה עם דמויות או חפצים",
-                "Enter - פתיחה/סגירה של הטלפון",
-                "מקש רווח - מחיקת הודעות בטלפון"
+                "תנועת השחקן - חיצים",
+                "Z - אינטראקציה עם דמויות או חפצים",
+                "    X - פתיחה/סגירה של הטלפון",
+                "   C - מחיקת הודעות בטלפון"
         };
     }
 
@@ -105,7 +105,7 @@ public class ExplanationScreen extends Screen {
         if (System.currentTimeMillis() - enterDelayStartTime < 500) {
             return;
         }
-        if (input.ENTER_key && canPressEnter()) {
+        if (input.E_key && canPressEnter()) {
             game.setScreen(new MainMenuScreen(game, input));
         }
     }

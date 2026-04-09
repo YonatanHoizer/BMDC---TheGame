@@ -18,15 +18,15 @@ public class PhoneUI {
     private Player player;
     private BufferedImage phoneIcon;
     private int selectedMessageIndex = 0;
-    // מיקום וגודל
+    // מיקום וגודל - נשארו בדיוק כפי שביקשת
     private final int phoneIconX = 1175;
     private final int phoneIconY = 590;
     private final int phoneIconSize = 128;
 
-    private final int phoneWindowX = 880;
-    private final int phoneWindowY = 550;
-    private final int phoneWindowWidth = 300;
-    private final int phoneWindowHeight = 150;
+    private final int phoneWindowX = 780;
+    private final int phoneWindowY = 480;
+    private final int phoneWindowWidth = 400;
+    private final int phoneWindowHeight = 220;
 
     private double inputTimer = 0;
     private final double INPUT_DELAY = 0.2;
@@ -34,7 +34,7 @@ public class PhoneUI {
     public PhoneUI(Player player) {
         this.player = player;
         try {
-            phoneIcon = ImageIO.read(getClass().getResource("/hud/phon.png"));
+            phoneIcon = ImageIO.read(getClass().getResource("/images/phon.png"));
         } catch (IOException | IllegalArgumentException e) {
             e.printStackTrace();
         }
@@ -49,13 +49,12 @@ public class PhoneUI {
     public void handleInput(InputManager input) {
         if (!player.isPhoneOpen()) return;
 
-        // אם הטיימר עדיין פעיל, אנחנו לא עושים כלום (חוסם דפדוף מהיר)
         if (inputTimer > 0) return;
 
         List<PhoneMessage> messages = player.getPhoneMessages();
         if (messages.isEmpty()) return;
 
-        boolean actionTaken = false; // משתנה עזר כדי לדעת אם בוצעה פעולה
+        boolean actionTaken = false;
 
         if (input.W_key) {
             selectedMessageIndex--;
@@ -71,16 +70,14 @@ public class PhoneUI {
             actionTaken = true;
         }
 
-        if (input.SPACE_key) {
+        if (input.F_key) {
             messages.remove(selectedMessageIndex);
-            // תיקון קריטי: אם מחקנו את ההודעה האחרונה, נזוז אחד אחורה
             if (selectedMessageIndex >= messages.size() && !messages.isEmpty()) {
                 selectedMessageIndex = messages.size() - 1;
             }
             actionTaken = true;
         }
 
-        // אם בוצעה פעולה (דפדוף או מחיקה), נפעיל את הטיימר
         if (actionTaken) {
             inputTimer = INPUT_DELAY;
         }
@@ -109,19 +106,15 @@ public class PhoneUI {
             int badgeWidth = Math.max(22, textWidth + 10);
             int badgeHeight = 22;
 
-            // המיקום המנצח:
             int badgeX = (phoneIconX + phoneIconSize) - badgeWidth - 30;
             int badgeY = phoneIconY - 5;
 
-            // אופציונלי: מסגרת לבנה קטנה כדי להפריד את האדום מהרקע
             g.setColor(Color.WHITE);
             g.fillRoundRect(badgeX - 2, badgeY - 2, badgeWidth + 4, badgeHeight + 4, 24, 24);
 
-            // הבועה האדומה
             g.setColor(Color.RED);
             g.fillRoundRect(badgeX, badgeY, badgeWidth, badgeHeight, 22, 22);
 
-            // המספר
             g.setColor(Color.WHITE);
             int textX = badgeX + (badgeWidth - textWidth) / 2;
             int textY = badgeY + ((badgeHeight - fm.getHeight()) / 2) + fm.getAscent();
@@ -136,43 +129,72 @@ public class PhoneUI {
         g.setColor(new Color(20, 20, 20, 230));
         g.fillRoundRect(phoneWindowX, phoneWindowY, phoneWindowWidth, phoneWindowHeight, 20, 20);
 
-        // כותרת
+        // מסגרת עדינה מסביב לטלפון
+        g.setColor(new Color(80, 80, 80));
+        g.drawRoundRect(phoneWindowX, phoneWindowY, phoneWindowWidth, phoneWindowHeight, 20, 20);
+
+        // כותרת "הודעות" - ממורכזת לאמצע החלון
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 18));
-        g.drawString("הודעות", phoneWindowX + 20, phoneWindowY + 30);
+        FontMetrics fmTitle = g.getFontMetrics();
+        int titleX = phoneWindowX + (phoneWindowWidth - fmTitle.stringWidth("הודעות")) / 2;
+        g.drawString("הודעות", titleX, phoneWindowY + 30);
+
+        // קו הפרדה עליון
+        g.setColor(new Color(150, 150, 150, 100));
+        g.drawLine(phoneWindowX + 20, phoneWindowY + 45, phoneWindowX + phoneWindowWidth - 20, phoneWindowY + 45);
 
         if (!messages.isEmpty()) {
             if (selectedMessageIndex >= messages.size()) selectedMessageIndex = messages.size() - 1;
 
             PhoneMessage msg = messages.get(selectedMessageIndex);
 
-            // שולח (מיושר שמאלה כדי לשמור על עיצוב של טלפון)
-            g.setFont(new Font("Arial", Font.BOLD, 14));
+            // חיווי על מיקום ברשימה - מצד ימין למעלה
+            g.setFont(new Font("Arial", Font.ITALIC, 14));
+            g.setColor(Color.LIGHT_GRAY);
+            String counterText = (selectedMessageIndex + 1) + " / " + messages.size();
+            FontMetrics fmCounter = g.getFontMetrics();
+            g.drawString(counterText, phoneWindowX + phoneWindowWidth - fmCounter.stringWidth(counterText) - 20, phoneWindowY + 30);
+
+            // שם השולח - מודגש וממורכז לאמצע!
+            g.setFont(new Font("Arial", Font.BOLD, 16));
             g.setColor(Color.CYAN);
-            g.drawString(msg.sender, phoneWindowX + 20, phoneWindowY + 60); // הרמתי קצת כדי לתת מקום לטקסט
+            FontMetrics fmSender = g.getFontMetrics();
+            int senderX = phoneWindowX + (phoneWindowWidth - fmSender.stringWidth(msg.sender)) / 2;
+            g.drawString(msg.sender, senderX, phoneWindowY + 75);
 
-            // תוכן ההודעה (משתמש בפונקציה המשופרת)
-            g.setFont(new Font("Arial", Font.PLAIN, 14));
+            // תוכן ההודעה
+            g.setFont(new Font("Arial", Font.PLAIN, 15));
             g.setColor(Color.WHITE);
-            drawCenteredMultiLineText(g, msg.text, phoneWindowY + 80); // מתחיל קצת מתחת לשולח
+            drawCenteredMultiLineText(g, msg.text, phoneWindowY + 110);
 
-            // חיווי על מיקום ברשימה
-            g.setFont(new Font("Arial", Font.ITALIC, 12));
-            g.drawString((selectedMessageIndex + 1) + " / " + messages.size(), phoneWindowX + phoneWindowWidth - 60, phoneWindowY + 30);
+            // כיתוב הדרכה קטן בתחתית (ממורכז)
+            g.setFont(new Font("Arial", Font.PLAIN, 12));
+            g.setColor(Color.GRAY);
+            String helpText = "לחץ C למחיקה";
+            FontMetrics fmHelp = g.getFontMetrics();
+            int helpX = phoneWindowX + (phoneWindowWidth - fmHelp.stringWidth(helpText)) / 2;
+            g.drawString(helpText, helpX, phoneWindowY + phoneWindowHeight - 15);
+
         } else {
-            g.setFont(new Font("Arial", Font.PLAIN, 14));
-            g.drawString("אין הודעות חדשות", phoneWindowX + 20, phoneWindowY + 80);
+            // טקסט מצב ריק - ממורכז גם אופקית וגם אנכית למרכז הטלפון
+            g.setFont(new Font("Arial", Font.PLAIN, 16));
+            g.setColor(Color.LIGHT_GRAY);
+            String emptyText = "אין הודעות חדשות";
+            FontMetrics fmEmpty = g.getFontMetrics();
+            int emptyX = phoneWindowX + (phoneWindowWidth - fmEmpty.stringWidth(emptyText)) / 2;
+            // חישוב המרכז האנכי (חצי מגובה החלון + חצי מגובה הפונט)
+            int emptyY = phoneWindowY + (phoneWindowHeight / 2) + (fmEmpty.getAscent() / 2);
+            g.drawString(emptyText, emptyX, emptyY);
         }
     }
 
-    // הפונקציה המשופרת שתומכת ב-\n, ירידת שורות אוטומטית ומרכוז אופקי
     private void drawCenteredMultiLineText(Graphics2D g, String text, int startY) {
         FontMetrics metrics = g.getFontMetrics();
-        int lineHeight = metrics.getHeight();
+        // הוספתי 5 פיקסלים למרווח השורות (Line Spacing) כדי שהטקסט ינשום טוב יותר
+        int lineHeight = metrics.getHeight() + 5;
 
         List<String> finalLines = new ArrayList<>();
-
-        // פיצול לפי \n ידני שאתה כותב בהודעה
         String[] paragraphs = text.split("\n");
 
         for (String paragraph : paragraphs) {
@@ -180,8 +202,7 @@ public class PhoneUI {
             StringBuilder currentLine = new StringBuilder();
 
             for (String word : words) {
-                // נשמור על שוליים פנימיים כדי שהטקסט לא ייגע בקצוות הטלפון (רוחב הטלפון פחות 20)
-                if (metrics.stringWidth(currentLine + word) < phoneWindowWidth - 20) {
+                if (metrics.stringWidth(currentLine + word) < phoneWindowWidth - 40) { // הגדלתי את השוליים משני הצדדים ל-40
                     currentLine.append(word).append(" ");
                 } else {
                     finalLines.add(currentLine.toString().trim());
@@ -191,33 +212,26 @@ public class PhoneUI {
             finalLines.add(currentLine.toString().trim());
         }
 
-        // ציור כל שורה ממורכזת לאמצע חלון הטלפון
+        // ציור כל שורה ממורכזת
         for (String line : finalLines) {
             int lineWidth = metrics.stringWidth(line);
-            // חישוב המרכז של הטלפון
             int startX = phoneWindowX + (phoneWindowWidth - lineWidth) / 2;
-
             g.drawString(line, startX, startY);
             startY += lineHeight;
         }
     }
 
     public boolean isViewingMessageContaining(String keyword) {
-        // אם הטלפון סגור, בטוח לא רואים את ההודעה
         if (!player.isPhoneOpen()) return false;
 
         List<PhoneMessage> messages = player.getPhoneMessages();
         if (messages.isEmpty()) return false;
 
-        // הגנה מחריגת אינדקס (במקרה שנמחקו הודעות)
         if (selectedMessageIndex >= messages.size()) {
             selectedMessageIndex = Math.max(0, messages.size() - 1);
         }
 
-        // שולפים את ההודעה שהשחקן קורא ממש עכשיו
         PhoneMessage currentMsg = messages.get(selectedMessageIndex);
-
-        // בודקים אם התוכן שלה מכיל את מילת המפתח שחיפשנו
         return currentMsg.text.contains(keyword);
     }
 }

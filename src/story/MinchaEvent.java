@@ -1,9 +1,7 @@
 package story;
 
 import ai.ChaseAI;
-import ai.MovementStep;
 import ai.PatrolAI;
-import ai.ScriptedMovementAI;
 import entities.NPC;
 import entities.Player;
 import hud.InteractiveDialogueBox;
@@ -13,7 +11,6 @@ import npcs.Sanans;
 import world.GameWorld;
 import world.Zone;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -38,7 +35,7 @@ public class MinchaEvent extends GameState {
     // ניהול שאלות רנדומליות
     private int currentQuestionIndex = 0;
     private String[][] questions = {
-            {"זה נהנה וזה לא חסר?", "חייב לשלם", "פטור מלשלם", "0"}, // 0 זו התשובה הנכונה
+            {"זה נהנה וזה לא חסר?", "חייב לשלם", "פטור מלשלם", "1"}, // 0 זו התשובה הנכונה
             {"מה הדין בשומר חינם שפשע?", "פטור", "חייב", "1"}, // 1 זו התשובה הנכונה
             {"מה השיעור של כזית לפי החזון איש?", "27 סמ''ק", "50 סמ''ק", "1"}
     };
@@ -115,7 +112,7 @@ public class MinchaEvent extends GameState {
         InteractiveDialogueBox dBox = world.getHUD().getDialogueBox();
 
         if (!isTalkingToStatic && player.getDistanceSquared(finaleNpcs.get(5)) < (64 * 64)) {
-            if (world.getInput().E_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
                 dBox.startDialogue(List.of("הנקניקיות האלה גמרו אותי סופית"));
@@ -124,7 +121,7 @@ public class MinchaEvent extends GameState {
         }
 
         if (!isTalkingToStatic && player.getDistanceSquared(finaleNpcs.get(9)) < (64 * 64)) {
-            if (world.getInput().E_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
                 dBox.startDialogue(List.of("מתקפת הטיטאנים זאת יצירת המופת הגדולה ביותר של המין האנושי"));
@@ -133,7 +130,7 @@ public class MinchaEvent extends GameState {
         }
 
         if (!isTalkingToStatic && player.getDistanceSquared(finaleNpcs.get(1)) < (64 * 64)) {
-            if (world.getInput().E_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
                 dBox.startDialogue(List.of("כן כן ,אפשר לדבר גם אם NPC שהולך ,זה עדיין בבנייה"));

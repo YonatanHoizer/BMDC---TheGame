@@ -2,6 +2,7 @@ package story;
 
 import ai.PatrolAI;
 import entities.NPC;
+import entities.Player;
 import npcs.Kroyzer;
 import npcs.Miller;
 import world.GameWorld;
@@ -99,6 +100,8 @@ public class ShacharitEvent extends GameState {
         }
         worshippers.get(12).setAlert(true);
         worshippers.get(7).setAlert(true);
+
+        world.getHUD().showTimer("זמן לכניסה לתפילה", 15);
     }
 
 
@@ -114,9 +117,11 @@ public class ShacharitEvent extends GameState {
 
             case PRAYING:
                 handlePrayingPhase(world);
+                handleStaticNpcDialogues(world.getPlayer(),world);
                 break;
 
             case WAITING_FOR_BREAKFAST_CONFIRMATION:
+                handleStaticNpcDialogues(world.getPlayer(),world);
                 handleBreakfastTransition(world);
                 break;
 
@@ -138,21 +143,22 @@ public class ShacharitEvent extends GameState {
         if (beitMidrash.contains(px, py)) {
             world.audio.loop("תפילה");
             phase = Phase.PRAYING;
+            world.getHUD().hideTimer();
             return;
         }
 
         if (timeToArrive <= 0) {
-            failPlayerType2(world);
+            world.audio.stopAll();
+            fail(2);
         }
     }
 
-    private void handlePrayingPhase(GameWorld world) {
+    private void handleStaticNpcDialogues(Player player, GameWorld world) {
         InteractiveDialogueBox dBox = world.getHUD().getDialogueBox();
-        prayerDuration -= deltaTime;
 
         // 1. בדיקה אם אנחנו רוצים להתחיל לדבר
         if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(registerNpc) < (64 * 64)) {
-            if (world.getInput().E_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
 
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
@@ -167,22 +173,22 @@ public class ShacharitEvent extends GameState {
         }
 
         if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(worshippers.get(12)) < (64 * 64)) {
-            if (world.getInput().E_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
 
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
                 worshippers.get(12).setAlert(false);
-                dBox.startDialogue(List.of("הלכתי לישון ב4 היה ריאל , אני גמור"));
+                dBox.startDialogue(List.of("שמע אחי היה רבע גמר ליגת האלופות אתמול,\n אלא שהקקות האלו החליטו לשחק ב4 בלילה, קיצר אני גמור מת"));
             }
         }
 
         if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(worshippers.get(7)) < (64 * 64)) {
-            if (world.getInput().E_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
 
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
                 worshippers.get(7).setAlert(false);
-                dBox.startDialogue(List.of("מה הקטע של הפינת קפה אם בחיים אין בה ,קפה,חלב,כפיות,או סוכר?!"));
+                dBox.startDialogue(List.of("מה הקטע של הפינת קפה אם בחיים אין בה \n לא קפה, לא חלב, לא כפיות, ולא סוכר?!"));
             }
         }
 
@@ -191,27 +197,26 @@ public class ShacharitEvent extends GameState {
             world.getPlayer().setInDialogue(false);
             isTalkingToStatic = false;
         }
+    }
+
+    private void handlePrayingPhase(GameWorld world) {
+        prayerDuration -= deltaTime;
 
         if (prayerDuration <= 0) {
-            world.getPlayer().addMessage("עקיבא", "ארוחת הבוקר מוכנה בחדר האוכל. כולם לבוא! \n למעבר לחדר אוכל לחץ E");
+            world.getPlayer().addMessage("עקיבא", "ארוחת הבוקר מוכנה בחדר האוכל. כולם לבוא! \n למעבר לחדר אוכל לחץ ENTER");
             phase = Phase.WAITING_FOR_BREAKFAST_CONFIRMATION;
         }
     }
 
     private void handleBreakfastTransition(GameWorld world) {
-        if (world.getPlayer().isPhoneOpen()) {
-            boolean readingBreakfastMsg = world.getHUD().getPhoneUI().isViewingMessageContaining("ארוחת הבוקר מוכנה");
-            if (readingBreakfastMsg) {
-                if (world.getInput().E_key){
-                    phase = Phase.TRANSITIONING;
-                }
-            }
+        if (world.getInput().E_key){
+            phase = Phase.TRANSITIONING;
         }
     }
 
     private void handleTransition(GameWorld world) {
         float currentAlpha = world.getFadeAlpha();
-
+        world.getPlayer().setPhoneOpen(false);
         if (currentAlpha < 1.0f) {
             world.setFadeAlpha(currentAlpha + (float)deltaTime * 0.7f);
 
@@ -229,11 +234,6 @@ public class ShacharitEvent extends GameState {
     private void teleportToDiningHall(GameWorld world) {
         world.getPlayer().setX(16 * 64);
         world.getPlayer().setY(8 * 64);
-    }
-
-    private void failPlayerType2(GameWorld world) {
-        world.audio.stopAll();
-        fail(2);
     }
 
     private void finishEvent() {

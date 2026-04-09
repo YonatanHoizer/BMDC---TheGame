@@ -30,7 +30,7 @@ public class GameOverScreen extends Screen {
     }
 
     private void setFailMessage() {
-        // כאן אתה מגדיר את 8 סוגי הפסילות שלך
+        // כאן אתה מגדיר את סוגי הפסילות שלך
         switch (failId) {
             case 1:
                 failMessage = "סננס תפס אותך! עליך להתחבא מהר יותר או לצאת למסדרון.";
@@ -39,17 +39,27 @@ public class GameOverScreen extends Screen {
                 failMessage = "איחרת לתפילה! הרב מילר ראה שלא הגעת והחרים לך את הטלפון ל24 שעות.";
                 break;
             case 3:
-                failMessage = "כנות לא מעניית את עקיבא בשיט...";
+                failMessage = "כנות לא מעניינת את עקיבא בשיט...";
                 break;
             case 4:
                 failMessage = "הרב מילר תפס אותך עם טלפון בבית מדרש";
                 break;
             case 5:
-                failMessage = "הרב קרוייזר תפס אותך אחרי שלא הגעת לשיעור שלו";
+                failMessage = "הרב קרוייזר תפס אותך אחרי שלא הגעת לשיעור שלו.";
                 break;
             case 6:
-                failMessage = "איי איי איי , כול כך קרובבב \n אם רק היית מקשיב יותר בשיעורים";
+                failMessage = "איי איי איי , כול כך קרובבב\nאם רק היית מקשיב יותר בשיעורים";
                 break;
+            case 7:
+                failMessage = "מיהרת מידי ,זה משחק עם עלילה אחרי הכול.";
+                break;
+            case 8:
+                failMessage = "אי אפשר סתם לדלג על שלבים אחי\nזה משחק עם עלילה בסופו של דבר.";
+                break;
+            case 9:
+                failMessage = "קצת פחדני ממך להיתחבא פה ממילר אתה לא חושב?\nתתחמק ממנו בתוך הבית מדרש ,אחרת למה כתבתי את כול הקוד הזה ?!";
+                break;
+            case 0:
             default:
                 failMessage = "נפסלת! נסה שנית.";
                 break;
@@ -60,7 +70,7 @@ public class GameOverScreen extends Screen {
     public void onEnter() {
         super.onEnter();
         buttonX = (screenWidth - buttonWidth) / 2;
-        buttonY = 500; // מיקום הכפתור בחלק התחתון של המסך
+        buttonY = 520; // הורדתי את הכפתור קצת למטה (מ-500 ל-520) כדי לתת מקום להודעות בעלות 2 שורות
     }
 
     @Override
@@ -77,15 +87,25 @@ public class GameOverScreen extends Screen {
         int titleX = (screenWidth - titleMetrics.stringWidth(title)) / 2;
         g.drawString(title, titleX, 200);
 
-        // הודעת הפסילה הספציפית
+        // ציור הודעת הפסילה הספציפית - עכשיו תומך בירידת שורות!
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.PLAIN, 32));
         FontMetrics msgMetrics = g.getFontMetrics();
-        int msgX = (screenWidth - msgMetrics.stringWidth(failMessage)) / 2;
-        g.drawString(failMessage, msgX, 350);
+
+        // חותכים את ההודעה למערך של שורות בכל פעם שיש \n
+        String[] lines = failMessage.split("\n");
+        int startY = 330; // נקודת ההתחלה של הטקסט
+        int lineHeight = msgMetrics.getHeight() + 10; // מרווח בין השורות
+
+        for (String line : lines) {
+            String trimmedLine = line.trim(); // מוריד רווחים מיותרים בתחילת/סוף השורה שנוצרו בגלל הפיצול
+            int msgX = (screenWidth - msgMetrics.stringWidth(trimmedLine)) / 2;
+            g.drawString(trimmedLine, msgX, startY);
+            startY += lineHeight; // יורד שורה עבור הטקסט הבא
+        }
 
         // ציור הכפתור לחזרה (מוגדר כ-true כי הוא תמיד מסומן - יש רק כפתור אחד)
-        drawButton(g, "חזור לתפריט הראשי", buttonX, buttonY, true);
+        drawButton(g, "לחץ E לחזרה לתפריט הראשי", buttonX, buttonY, true);
     }
 
     private void drawButton(Graphics2D g, String text, int x, int y, boolean selected) {
@@ -115,8 +135,8 @@ public class GameOverScreen extends Screen {
             return;
         }
 
-        // כשיש רק כפתור אחד, רק מחכים לאנטר
-        if (input.ENTER_key && canPressEnter()) {
+        // כשיש רק כפתור אחד, רק מחכים לאנטר (או במקרה שלך E)
+        if (input.E_key && canPressEnter()) {
             game.setScreen(new MainMenuScreen(game, input));
         }
     }

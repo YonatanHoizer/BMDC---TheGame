@@ -20,6 +20,7 @@ public class LunchEvent extends GameState {
 
     private Zone diningRoom;
     private Zone beitMidrash;
+    private Zone path;
 
     // דמויות בחדר אוכל
     private Akiva akiva;
@@ -50,9 +51,10 @@ public class LunchEvent extends GameState {
 
     private Phase phase;
 
-    public LunchEvent(Zone diningRoom, Zone beitMidrash,Kroyzer kroyzer) {
+    public LunchEvent(Zone diningRoom, Zone beitMidrash, Zone path, Kroyzer kroyzer) {
         this.diningRoom = diningRoom;
         this.beitMidrash = beitMidrash;
+        this.path = path;
         this.kroyzer = kroyzer;
     }
 
@@ -110,6 +112,7 @@ public class LunchEvent extends GameState {
                 break;
             case FREE_ROAM:
                 handleFreeRoam(player, world);
+                handleStaticNpcDialogues(player,world);
                 break;
             case FINISHED:
                 break;
@@ -135,7 +138,7 @@ public class LunchEvent extends GameState {
         InteractiveDialogueBox dBox = world.getHUD().getDialogueBox();
 
         if (!isTalkingToStatic && player.getDistanceSquared(diningNPCs.get(5)) < (64 * 64)) {
-            if (world.getInput().E_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
                 diningNPCs.get(5).setAlert(false);
@@ -144,7 +147,7 @@ public class LunchEvent extends GameState {
         }
 
         if (!isTalkingToStatic && player.getDistanceSquared(diningNPCs.get(4)) < (64 * 64)) {
-            if (world.getInput().E_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
                 diningNPCs.get(4).setAlert(false);
@@ -168,7 +171,7 @@ public class LunchEvent extends GameState {
 
         // השחקן ניגש לעקיבא
         if (!isAkivaDialogueActive && player.getDistanceSquared(akiva) < (120 * 120)) {
-            if (world.getInput().E_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady()) {
 
                 player.setInDialogue(true);
                 isAkivaDialogueActive = true;
@@ -182,6 +185,11 @@ public class LunchEvent extends GameState {
 
                 phase = Phase.AKIVA_DIALOGUE;
             }
+        }
+
+        if (path.contains(player.getX(),player.getY())){
+            world.audio.stopAll();
+            fail(8);
         }
     }
 

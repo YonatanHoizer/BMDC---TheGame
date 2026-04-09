@@ -1,7 +1,6 @@
 
 package ui;
 
-import ui.GameScreen;
 import engine.InputManager;
 import main.Game;
 
@@ -83,7 +82,7 @@ public class MainMenuScreen extends Screen {
         // הוראות
         g.setFont(new Font("Arial", Font.PLAIN, 20));
         g.setColor(Color.LIGHT_GRAY);
-        g.drawString("חצים למעלה/למטה, Enter לבחירה", 500, 650);
+        g.drawString("חצים למעלה/למטה, ENTER לבחירה", 500, 650);
     }
 
     private void drawButton(Graphics2D g, String text, int x, int y, boolean selected) {
@@ -122,7 +121,7 @@ public class MainMenuScreen extends Screen {
         if (System.currentTimeMillis() - enterDelayStartTime < 500) {
             return;
         }
-        if (input.ENTER_key && canPressEnter()) {
+        if (input.E_key && canPressEnter()) {
             if (selectedButton == 0) {
                 game.setScreen(new GameScreen(game, input));
             } else if (selectedButton == 1) {
