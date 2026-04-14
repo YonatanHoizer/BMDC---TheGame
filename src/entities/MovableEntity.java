@@ -1,6 +1,5 @@
 package entities;
 
-import engine.Time;
 import world.GameWorld;
 import util.Rect;
 import java.awt.image.BufferedImage;

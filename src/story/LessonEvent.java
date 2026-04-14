@@ -8,13 +8,12 @@ import npcs.Kroyzer;
 import npcs.Miller;
 import world.GameWorld;
 import world.Zone;
-
+import static main.Game.deltaTime;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import static engine.Time.deltaTime;
 
 public class LessonEvent extends GameState {
 
@@ -78,7 +77,7 @@ public class LessonEvent extends GameState {
 
                     // חשוב מאוד: יוצרים AI חדש לכל אחד!
                     ScriptedMovementAI walkAI = ScriptedMovementAI.createWalkToClassAI();
-                    npc.setSpeed(250);
+                    npc.setSpeed(350);
                     npc.setMovementAI(walkAI);
 
                     // מוסיפים לרשימת הרצים

@@ -7,7 +7,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-import static engine.Time.deltaTime;
+import static main.Game.deltaTime;
 
 public class NPC extends MovableEntity {
 

@@ -12,7 +12,7 @@ import hud.InteractiveDialogueBox; // ייבוא של התיבה החדשה
 import java.util.ArrayList;
 import java.util.List;
 
-import static engine.Time.deltaTime;
+import static main.Game.deltaTime;
 
 public class ShacharitEvent extends GameState {
 

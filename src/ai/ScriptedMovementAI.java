@@ -3,7 +3,7 @@ package ai;
 import entities.NPC;
 import world.GameWorld;
 
-import static engine.Time.deltaTime;
+import static main.Game.deltaTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,10 +41,22 @@ public class ScriptedMovementAI implements MovementAI {
                 float dx = step.targetX - npc.getX();
                 float dy = step.targetY - npc.getY();
 
-                if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
+                // חישוב המרחק האמיתי (פיתגורס)
+                float distance = (float) Math.sqrt(dx * dx + dy * dy);
+
+                // חישוב גודל הצעד שה-NPC עושה בפריים הנוכחי
+                // (בהנחה שיש ל-NPC שלך פונקציה כמו getSpeed())
+                float moveStep = npc.getSpeed() * (float) deltaTime;
+
+                // אם המרחק ליעד קטן או שווה לצעד אחד שלנו - הגענו!
+                if (distance <= moveStep) {
+                    // "ממגנטים" את ה-NPC בדיוק ליעד כדי שלא יחרוג אפילו בחצי פיקסל
+                    npc.setX(step.targetX);
+                    npc.setY(step.targetY);
                     npc.stop();
                     currentStep++;
                 } else {
+                    // עדיין רחוקים? תמשיך לזוז כרגיל
                     npc.moveTowards(dx, dy);
                 }
                 break;

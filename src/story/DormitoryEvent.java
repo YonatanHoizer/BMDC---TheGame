@@ -10,7 +10,7 @@ import world.GameWorld;
 import world.Zone;
 import ai.PatrolAI;
 import ui.GameScreen;
-import static engine.Time.deltaTime;
+import static main.Game.deltaTime;
 import entities.Player;
 
 import java.util.ArrayList;

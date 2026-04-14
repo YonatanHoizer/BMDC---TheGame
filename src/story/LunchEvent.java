@@ -14,7 +14,7 @@ import world.Zone;
 import java.util.ArrayList;
 import java.util.List;
 
-import static engine.Time.deltaTime;
+import static main.Game.deltaTime;
 
 public class LunchEvent extends GameState {
 

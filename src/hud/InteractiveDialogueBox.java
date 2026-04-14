@@ -77,7 +77,7 @@ public class InteractiveDialogueBox {
             if (input.Z_key) {
                 finalChoice = selectedOption;
                 visible = false;
-                cooldownTimer = 0.5;
+                cooldownTimer = 0.2;
                 inputTimer = INPUT_DELAY;
             }
         }
@@ -87,7 +87,7 @@ public class InteractiveDialogueBox {
                 currentPage++;
                 if (currentPage >= pages.size()) {
                     visible = false;
-                    cooldownTimer = 0.5;
+                    cooldownTimer = 0.2;
                 }
                 inputTimer = INPUT_DELAY;
             }

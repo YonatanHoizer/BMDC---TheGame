@@ -5,7 +5,7 @@ import javax.swing.JFrame;
 public class Main {
 
     public static void main(String[] args) {
-        JFrame window = new JFrame("Yeshiva Escape");
+        JFrame window = new JFrame("BMDC - the game");
 
         Game game = new Game();
 

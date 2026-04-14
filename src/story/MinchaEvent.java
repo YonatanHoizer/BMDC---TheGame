@@ -14,7 +14,7 @@ import world.Zone;
 import java.util.List;
 import java.util.Random;
 
-import static engine.Time.deltaTime;
+import static main.Game.deltaTime;
 
 public class MinchaEvent extends GameState {
 

@@ -1,7 +1,6 @@
 package main;
 
 import engine.InputManager;
-import engine.Time;
 import ui.Screen;
 import ui.MainMenuScreen;
 
@@ -10,13 +9,13 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Color;
-import java.awt.event.KeyEvent;
 
 /**
  * מחלקת המשחק המרכזית - מנהלת את ה-Loop ואת החלפת המסכים
  */
 public class Game extends JPanel implements Runnable {
 
+    public static double deltaTime = 0;
     private Thread gameThread;
     private boolean running = false;
 
@@ -74,11 +73,11 @@ public class Game extends JPanel implements Runnable {
             lastTime = currentTime;
             if (delta >= 1) {
                 // 1. קודם כל מעדכנים את הזמן הגלובלי
-                Time.deltaTime = 1.0 / 60.0;
+                deltaTime = 1.0 / 60.0;
 
                 // 2. קוראים ל-update פעם אחת בלבד
                 // ה-update הזה כבר יפעיל את player.update() שבסוף יפעיל את move()
-                update(Time.deltaTime);
+                update(deltaTime);
 
                 // 3. מציירים
                 repaint();

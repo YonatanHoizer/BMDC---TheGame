@@ -4,7 +4,7 @@ import entities.NPC;
 import entities.Player;
 import world.GameWorld;
 
-import static engine.Time.deltaTime; // ודא שהייבוא הזה קיים אצלך (או world.getDeltaTime())
+import static main.Game.deltaTime;
 
 public class ChaseAI implements MovementAI {
 

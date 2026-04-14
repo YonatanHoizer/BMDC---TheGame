@@ -105,7 +105,7 @@ public class GameOverScreen extends Screen {
         }
 
         // ציור הכפתור לחזרה (מוגדר כ-true כי הוא תמיד מסומן - יש רק כפתור אחד)
-        drawButton(g, "לחץ E לחזרה לתפריט הראשי", buttonX, buttonY, true);
+        drawButton(g, "לחץ Enter לחזרה לתפריט הראשי", buttonX, buttonY, true);
     }
 
     private void drawButton(Graphics2D g, String text, int x, int y, boolean selected) {
