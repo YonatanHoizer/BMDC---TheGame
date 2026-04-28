@@ -4,6 +4,7 @@ import engine.AudioManager;
 import engine.InputManager;
 import hud.PhoneMessage;
 import ui.Screen;
+import world.GameWorld;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -66,13 +67,13 @@ public class Player extends MovableEntity {
         }
     }
 
-    public void update(InputManager input, Screen currentScreen) {
+    public void update(InputManager input, Screen currentScreen ,GameWorld world) {
         if (!phoneOpen && !inDialogue) {
             handleMovement(input);
         }
 
         // לוגיקת טלפון
-        if (input.X_key && currentScreen.canPressEnter() && !inDialogue) {
+        if (input.X_key && currentScreen.canPressEnter() && !inDialogue && !world.getHUD().getDialogueBox().isVisible()) {
             togglePhone();
             currentScreen.resetEnterTimer();
         }

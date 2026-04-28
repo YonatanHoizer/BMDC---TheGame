@@ -107,7 +107,7 @@ public class GameWorld {
         this.currentInput = input;
 
         // 1. Player
-        player.update(input, gameScreen);
+        player.update(input, gameScreen , this);
         player.move(deltaTime, this);
 
         // 2. NPCs

@@ -1,6 +1,8 @@
 package hud;
 
 import engine.InputManager;
+import world.GameWorld;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -63,9 +65,9 @@ public class InteractiveDialogueBox {
         this.inputTimer = INPUT_DELAY;
     }
 
-    public void handleInput(InputManager input) {
+    public void handleInput(InputManager input ,GameWorld world) {
         if (!visible || inputTimer > 0) return;
-
+        if (world.getPlayer().isPhoneOpen()) return;
         // במצב בחירה
         if (isChoiceMode && currentPage == pages.size() - 1) {
             // ניווט ימינה ושמאלה

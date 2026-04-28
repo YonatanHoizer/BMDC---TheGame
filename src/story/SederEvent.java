@@ -186,7 +186,7 @@ public class SederEvent extends GameState {
             }
 
             if (player.getDistanceSquared(Yosef) < (64 * 64) && !isTalkingToYosef) {
-                if (world.getInput().Z_key && !dBox.isVisible()) {
+                if (world.getInput().Z_key && !dBox.isVisible() && !player.isPhoneOpen()) {
                     player.setInDialogue(true);
                     isTalkingToYosef = true;
                     dBox.startDialogueWithChoice("להביא ליוסף את החלב ?","כן","כן");
@@ -229,7 +229,7 @@ public class SederEvent extends GameState {
         InteractiveDialogueBox dBox = world.getHUD().getDialogueBox();
 
         if (!isTalkingToStatic && player.getDistanceSquared(talkativeNpc1) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
                 talkativeNpc1.setAlert(false);
@@ -238,7 +238,7 @@ public class SederEvent extends GameState {
         }
 
         if (!isTalkingToStatic && player.getDistanceSquared(talkativeNpc2) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
                 talkativeNpc2.setAlert(false);

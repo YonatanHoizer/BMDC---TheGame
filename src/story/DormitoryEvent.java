@@ -74,7 +74,7 @@ public class DormitoryEvent extends GameState {
 
         world.audio.loadSound("סננס","/sounds/סננס סאונד.wav");
         world.audio.play("סננס");
-        world.getHUD().showTopMessage("סננס מתקרב לחדר! עליך להתחבא מהר לפני שהוא נכנס \n אתה יכול גם לצאת למסדרון כדי להתחמק ממנו", 5.0); // - ככה מוסיפים הודעה על המסך
+        world.getHUD().showTopMessage("סננס מתקרב לחדר! עליך להתחבא מהר לפני שהוא נכנס \n אתה יכול גם לצאת למסדרון כדי להתחמק ממנו", 8.0); // - ככה מוסיפים הודעה על המסך
     }
 
     @Override

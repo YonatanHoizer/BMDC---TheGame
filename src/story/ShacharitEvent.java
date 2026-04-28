@@ -158,7 +158,7 @@ public class ShacharitEvent extends GameState {
 
         // 1. בדיקה אם אנחנו רוצים להתחיל לדבר
         if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(registerNpc) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
 
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
@@ -173,7 +173,7 @@ public class ShacharitEvent extends GameState {
         }
 
         if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(worshippers.get(12)) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
 
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
@@ -183,7 +183,7 @@ public class ShacharitEvent extends GameState {
         }
 
         if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(worshippers.get(7)) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
 
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
@@ -232,8 +232,8 @@ public class ShacharitEvent extends GameState {
     }
 
     private void teleportToDiningHall(GameWorld world) {
-        world.getPlayer().setX(16 * 64);
-        world.getPlayer().setY(8 * 64);
+        world.getPlayer().setX(17 * 64);
+        world.getPlayer().setY(5 * 64);
     }
 
     private void finishEvent() {

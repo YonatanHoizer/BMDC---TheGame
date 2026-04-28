@@ -112,7 +112,7 @@ public class MinchaEvent extends GameState {
         InteractiveDialogueBox dBox = world.getHUD().getDialogueBox();
 
         if (!isTalkingToStatic && player.getDistanceSquared(finaleNpcs.get(5)) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
                 dBox.startDialogue(List.of("הנקניקיות האלה גמרו אותי סופית"));
@@ -121,7 +121,7 @@ public class MinchaEvent extends GameState {
         }
 
         if (!isTalkingToStatic && player.getDistanceSquared(finaleNpcs.get(9)) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
                 dBox.startDialogue(List.of("מתקפת הטיטאנים זאת יצירת המופת הגדולה ביותר של המין האנושי"));
@@ -130,7 +130,7 @@ public class MinchaEvent extends GameState {
         }
 
         if (!isTalkingToStatic && player.getDistanceSquared(finaleNpcs.get(1)) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
                 player.setInDialogue(true);
                 isTalkingToStatic = true;
                 dBox.startDialogue(List.of("כן כן ,אפשר לדבר גם אם NPC שהולך ,זה עדיין בבנייה"));
@@ -144,6 +144,10 @@ public class MinchaEvent extends GameState {
         }
 
         if (prePrayerTimer <= 0) {
+            if (!beitMidrash.contains(player.getX(),player.getY())){
+                world.audio.stopAll();
+                fail(10);
+            }
             phase = Phase.TENSION_BUILDUP;
         }
     }

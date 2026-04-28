@@ -2,6 +2,7 @@ package hud;
 
 import entities.Player;
 import engine.InputManager;
+import world.GameWorld;
 
 import java.awt.*;
 
@@ -84,9 +85,9 @@ public class HUD {
         topMessageBox.show(text, timer);
     }
 
-    public void handleInput(InputManager input) {
+    public void handleInput(InputManager input ,GameWorld world) {
         if(phoneUI != null) phoneUI.handleInput(input);
-        dialogueBox.handleInput(input);
+        dialogueBox.handleInput(input, world);
     }
 
     public void setTopMessageBox(MassageBoxTop box) {

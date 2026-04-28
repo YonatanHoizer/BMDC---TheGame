@@ -28,7 +28,7 @@ public class GameScreen extends Screen {
         super(input);
         this.game = game;
 
-        this.player = new Player(20 * 64,52 * 64); //תחילת משחק
+        this.player = new Player(20 * 64,53 * 64); //תחילת משחק
         //this.player = new Player(17 * 64,5 * 64); //חדר אוכל
         //this.player = new Player(5 * 64,32 * 64); //מול בית מדרש
 
@@ -48,7 +48,7 @@ public class GameScreen extends Screen {
         // עדכון מצלמה עם הערכים שחושבו פעם אחת בבנאי
         camera.update(player, worldWidth, worldHeight);
 
-        world.getHUD().handleInput(input);
+        world.getHUD().handleInput(input ,world);
         world.getHUD().update(deltaTime);
 
         if (world.getStoryManager().getState() == StoryState.GAME_OVER) {

@@ -59,7 +59,9 @@ public class GameOverScreen extends Screen {
             case 9:
                 failMessage = "קצת פחדני ממך להיתחבא פה ממילר אתה לא חושב?\nתתחמק ממנו בתוך הבית מדרש ,אחרת למה כתבתי את כול הקוד הזה ?!";
                 break;
-            case 0:
+            case 10:
+                failMessage = "היית צריך להישאר בבית מדרש \n יש סיום יפה למשחק , חבל שתפספס אותו";
+                break;
             default:
                 failMessage = "נפסלת! נסה שנית.";
                 break;

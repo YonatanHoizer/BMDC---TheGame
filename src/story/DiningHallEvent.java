@@ -28,6 +28,7 @@ public class DiningHallEvent extends GameState {
     private boolean sederMessageReceived = false;
     private double milkInteractionCooldown = 0;
     private boolean OutsideOfDiningHall = false;
+    private boolean finishAkivaChase = false;
 
 
     // משימת החלב
@@ -140,7 +141,7 @@ public class DiningHallEvent extends GameState {
         }
 
         // 2. הודעה על תחילת הסדר (אחרי 60 שניות)
-        if (timeInDiningHall >= 20 && !sederMessageReceived) {
+        if (timeInDiningHall >= 12 && !sederMessageReceived) {
             world.getPlayer().addMessage("הרב מילר", "סדר בוקר מתחיל בבית המדרש.");
             sederMessageReceived = true;
         }
@@ -154,7 +155,7 @@ public class DiningHallEvent extends GameState {
              nearMilk = (Math.abs(px - Milk.getX()) < 64 && Math.abs(py - Milk.getY()) < 64);
         }
         if (milkMissionReceived && !hasMilk && !isMilkDialogueActive && nearMilk && milkInteractionCooldown <= 0) {
-            if (world.getInput().Z_key && !dBox.isVisible()) {
+            if (world.getInput().Z_key && !dBox.isVisible() && !world.getPlayer().isPhoneOpen()) {
                 world.getPlayer().setInDialogue(true);
                 isMilkDialogueActive = true;
                 dBox.startDialogueWithChoice("זה קרטון החלב פג תוקף כרגיל. לקחת אותו?", "כן, ברור", "לא, אסור לגנוב");
@@ -180,7 +181,7 @@ public class DiningHallEvent extends GameState {
         }
 
         if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(diningNPCs.get(0)) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !world.getPlayer().isPhoneOpen()) {
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
                 diningNPCs.get(0).setAlert(false);
@@ -189,7 +190,7 @@ public class DiningHallEvent extends GameState {
         }
 
         if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(diningNPCs.get(1)) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !world.getPlayer().isPhoneOpen()) {
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
                 diningNPCs.get(1).setAlert(false);
@@ -204,7 +205,7 @@ public class DiningHallEvent extends GameState {
 
         // 4. יציאה מחדר האוכל (מתחילים ללכת בשביל)
         if (!diningHall.contains(px, py)) {
-            if (timeInDiningHall >= 25.0) {
+            if (timeInDiningHall >= 15.0) {
                 phase = Phase.ON_PATH;
                 world.audio.stop("חדר אוכל");
                 world.audio.play("חדר אוכל יציאה");
@@ -240,7 +241,7 @@ public class DiningHallEvent extends GameState {
         float py = world.getPlayer().getY();
 
         // אם השחקן הגיע לבית המדרש (שרד את השביל)
-        if (path.contains(px, py)) {
+        if (path.contains(px, py) && finishAkivaChase) {
             finishEvent();
             return;
         }
@@ -308,6 +309,7 @@ public class DiningHallEvent extends GameState {
             akiva.setMovementAI(ScriptedMovementAI.createDiningHallAkivaAI());
             phase = Phase.ON_PATH;
             akivaDismissing = false;
+            finishAkivaChase = true;
             world.getPlayer().setSpeed(350.0f);
         }
     }

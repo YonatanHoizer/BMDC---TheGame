@@ -138,7 +138,7 @@ public class LunchEvent extends GameState {
         InteractiveDialogueBox dBox = world.getHUD().getDialogueBox();
 
         if (!isTalkingToStatic && player.getDistanceSquared(diningNPCs.get(5)) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
                 diningNPCs.get(5).setAlert(false);
@@ -147,7 +147,7 @@ public class LunchEvent extends GameState {
         }
 
         if (!isTalkingToStatic && player.getDistanceSquared(diningNPCs.get(4)) < (64 * 64)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
                 world.getPlayer().setInDialogue(true);
                 isTalkingToStatic = true;
                 diningNPCs.get(4).setAlert(false);
@@ -171,7 +171,7 @@ public class LunchEvent extends GameState {
 
         // השחקן ניגש לעקיבא
         if (!isAkivaDialogueActive && player.getDistanceSquared(akiva) < (120 * 120)) {
-            if (world.getInput().Z_key && dBox.isReady()) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
 
                 player.setInDialogue(true);
                 isAkivaDialogueActive = true;
