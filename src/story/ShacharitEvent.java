@@ -18,7 +18,7 @@ public class ShacharitEvent extends GameState {
 
     private Zone beitMidrash;
     // טיימרים
-    private double timeToArrive = 15.0;
+    private double timeToArrive = 20.0;
     private double prayerDuration = 30.0;
 
     // NPC מיוחד לרישום
@@ -101,7 +101,7 @@ public class ShacharitEvent extends GameState {
         worshippers.get(12).setAlert(true);
         worshippers.get(7).setAlert(true);
 
-        world.getHUD().showTimer("זמן לכניסה לתפילה", 15);
+        world.getHUD().showTimer("זמן לכניסה לתפילה", 20);
     }
 
 

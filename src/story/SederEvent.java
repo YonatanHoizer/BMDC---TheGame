@@ -264,6 +264,10 @@ public class SederEvent extends GameState {
         if (Yosef != null) world.removeNPC(Yosef);
         texst.clear();
 
+        miller.setMovementAI(new PatrolAI(beitMidrash));
+        miller.setAlert(false);
+        miller.setSpeed(150);
+
         world.getStoryManager().setStudentsForClass(this.allSederNpcs);
         world.getStoryManager().setMiller(this.miller);
     }

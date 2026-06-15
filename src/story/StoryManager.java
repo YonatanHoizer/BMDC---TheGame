@@ -24,7 +24,7 @@ public class StoryManager {
     private Zone corridor = new Zone("מסדרון", 6 * 64, 46 * 64, 32 * 64, 3 * 64);
     private Zone baitMidrash = new Zone("בית מדרש", 10 * 64, 26 * 64, 18 * 64, 13 * 64);
     private Zone diningRoom = new Zone("חדר אוכל", 14 * 64, 64, 23 * 64, 16 * 64);
-    private Zone path = new Zone("שביל", 0, 15 * 64, 15 * 64, 64);
+    private Zone path = new Zone("שביל", 0, 15 * 64, 35 * 64, 64 * 11);
     private Zone KroyzerClass = new Zone("קרוייזר כיתה", 29 * 64, 25 * 64, 10 * 64, 7 * 64);
     private Zone playerSeat = new Zone("מקום השחקן בכיתה", 32 * 64 + 16, 30 * 64, 32, 64);
     private int currentFailReason = 0;

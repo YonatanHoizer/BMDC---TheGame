@@ -28,8 +28,8 @@ public class GameScreen extends Screen {
         super(input);
         this.game = game;
 
-        this.player = new Player(20 * 64,53 * 64); //תחילת משחק
-        //this.player = new Player(17 * 64,5 * 64); //חדר אוכל
+        //this.player = new Player(20 * 64,53 * 64); //תחילת משחק
+        this.player = new Player(17 * 64,5 * 64); //חדר אוכל
         //this.player = new Player(5 * 64,32 * 64); //מול בית מדרש
 
         this.world = new GameWorld(player);
