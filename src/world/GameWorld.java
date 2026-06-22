@@ -68,7 +68,6 @@ public class GameWorld {
 
         // אתחול StoryManager והסצנה הראשונה
         storyManager = new StoryManager(this);
-        activeState = storyManager.startStory(StoryState.DORMITORY);
 
         try {
             BufferedImage canImg = ImageIO.read(getClass().getResourceAsStream("/images/can machine.png"));
@@ -266,7 +265,7 @@ public class GameWorld {
     }
 
     public GameState getActiveState() {
-        return activeState;
+        return storyManager != null ? storyManager.getActiveState() : null;
     }
 
     public void setActiveState(GameState state) {

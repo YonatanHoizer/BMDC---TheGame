@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="YeshivaEscape:jar2">
+    <output-path>$PROJECT_DIR$/out/artifacts/YeshivaEscape_jar2</output-path>
+    <root id="archive" name="YeshivaEscape.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/resources/src/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="YeshivaEscape" />
+    </root>
+  </artifact>
+</component>

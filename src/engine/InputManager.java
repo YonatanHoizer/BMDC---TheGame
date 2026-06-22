@@ -6,7 +6,7 @@ public class InputManager implements KeyListener {
 
     private final boolean[] keys = new boolean[256];
 
-    public boolean W_key, S_Key, A_key, D_key, F_key, X_key, Z_key, E_key;
+    public boolean W_key, S_Key, A_key, D_key, F_key, X_key, Z_key, E_key, ESC_key;
 
     public void update() {
         W_key = keys[KeyEvent.VK_W] || keys[KeyEvent.VK_UP];
@@ -17,6 +17,7 @@ public class InputManager implements KeyListener {
         X_key = keys[KeyEvent.VK_X];
         Z_key = keys[KeyEvent.VK_Z];
         E_key = keys[KeyEvent.VK_ENTER];
+        ESC_key = keys[KeyEvent.VK_ESCAPE];
     }
 
     @Override

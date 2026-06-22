@@ -1,5 +1,6 @@
 package story;
 
+import ai.PatrolAI;
 import entities.NPC;
 import npcs.Kroyzer;
 import npcs.Miller;
@@ -10,7 +11,6 @@ import world.Zone;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.*;
-
 
 public class StoryManager {
 
@@ -129,6 +129,9 @@ public class StoryManager {
 
     // ======== FACTORY METHOD ========
     private GameState createStateByStoryState(StoryState state) {
+        // קריאה לפונקציית העזר לבדיקה ושחזור נתונים לפני יצירת השלב
+        initializeWorldDataForLoadedGame(state);
+
         switch (state) {
             case DORMITORY:
                 return new DormitoryEvent(dormRoom, bathroom, corridor, secondedormRoom, thirdDormRoom);
@@ -150,6 +153,96 @@ public class StoryManager {
                 return null;
             default:
                 return null;
+        }
+    }
+
+    /**
+     * פונקציית עזר המאכלסת נתוני רקע חסרים במקרה של טעינת משחק ישירה לשלבים מתקדמים
+     */
+    private void initializeWorldDataForLoadedGame(StoryState state) {
+        // שחזור נתונים עבור שלב LESSON (במידה והגענו מטעינת משחק ישירה ו-SEDER לא רץ)
+        if (state == StoryState.LESSON) {
+            if (this.miller == null) {
+                // המיקום המקורי שנקבע ב-SEDER
+                this.miller = new Miller(15 * 64, 30 * 64, 64, 64);
+                miller.setMillerPatrolAI(new PatrolAI(baitMidrash));
+                world.addNPC(miller);
+            }
+            if (this.studentsForClass == null || this.studentsForClass.isEmpty()) {
+                this.studentsForClass = new ArrayList<>();
+                // שחזור 4 תלמידי ה-Patrol הרגילים מתוך ה-SEDER
+                this.studentsForClass.add(new NPC(10 * 64, 30 * 64, 64, 64, 3, 4));
+                this.studentsForClass.add(new NPC(20 * 64, 33 * 64, 64, 64, 1, 4));
+                this.studentsForClass.add(new NPC(16 * 64, 30 * 64, 64, 64, 4, 4));
+                this.studentsForClass.add(new NPC(18 * 64, 29 * 64, 64, 64, 5, 4));
+                // שחזור 2 תלמידי הדיאלוג מה-SEDER
+                this.studentsForClass.add(new NPC(15 * 64, 35 * 64, 64, 64, 2, 4));
+                this.studentsForClass.add(new NPC(28 * 64, 29 * 64, 64, 64, 4, 1));
+
+                for (NPC npc : studentsForClass){
+                    world.addNPC(npc);
+                }
+            }
+
+        }
+
+        // שחזור נתונים עבור שלב MINCHA (במידה והגענו מטעינת משחק ישירה ו-LUNCH לא רץ)
+        if (state == StoryState.MINCHA) {
+            if (this.miller == null) {
+                this.miller = new Miller(19 * 64, 26 * 64, 64, 64);
+                world.addNPC(miller);
+            }
+            if (this.kroyzer == null) {
+                this.kroyzer = new Kroyzer(16 * 64, 26 * 64, 64, 64);
+                world.addNPC(kroyzer);
+            }
+            if (this.sanans == null) {
+                this.sanans = new Sanans(22 * 64, 26 * 64, 64, 64);
+                world.addNPC(sanans);
+            }
+            if (this.studentsForClass == null || this.studentsForClass.isEmpty()) {
+                this.studentsForClass = new ArrayList<>();
+                // שחזור רשימת ה-finaleNpcs מתוך לוגיקת loadFinaleNPCs של LUNCH
+                NPC MoveWorshipper1 = new NPC(17 * 64, 38 * 64, 64, 64, 4, 4);
+                studentsForClass.add(MoveWorshipper1);
+                NPC MoveWorshipper2 = new NPC(19 * 64, 38 * 64, 64, 64, 5, 4);
+                studentsForClass.add(MoveWorshipper2);
+                NPC MoveWorshipper3 = new NPC(22 * 64, 38 * 64, 64, 64, 4, 4);
+                studentsForClass.add(MoveWorshipper3);
+
+                NPC student1 = new NPC(25 * 64, 29 * 64, 64, 64, 1, 4);
+                NPC student2 = new NPC(21 * 64, 35 * 64, 64, 64, 2, 4);
+                student1.setAlert(false);
+                student2.setAlert(false);
+                studentsForClass.add(student1);
+                studentsForClass.add(student2);
+
+                NPC worshipper   = new NPC(15 * 64, 32 * 64, 64, 64, 3, 4);
+                studentsForClass.add(worshipper);
+                NPC worshipper1  = new NPC(14 * 64, 35 * 64, 64, 64, 4, 4);
+                studentsForClass.add(worshipper1);
+                NPC worshipper2  = new NPC(16 * 64, 29 * 64, 64, 64, 5, 4);
+                studentsForClass.add(worshipper2);
+                NPC worshipper3  = new NPC(20 * 64, 32 * 64, 64, 64, 1, 4);
+                studentsForClass.add(worshipper3);
+                NPC worshipper5  = new NPC(20 * 64, 29 * 64, 64, 64, 6, 4);
+                studentsForClass.add(worshipper5);
+                NPC worshipper6  = new NPC(19 * 64, 38 * 64, 64, 64, 3, 4);
+                studentsForClass.add(worshipper6);
+                NPC worshipper7  = new NPC(24 * 64, 32 * 64, 64, 64, 1, 4);
+                studentsForClass.add(worshipper7);
+                NPC worshipper8  = new NPC(25 * 64, 35 * 64, 64, 64, 4, 4);
+                studentsForClass.add(worshipper8);
+                NPC worshipper10 = new NPC(24 * 64, 38 * 64, 64, 64, 5, 4);
+                studentsForClass.add(worshipper10);
+
+                for (int i = 0; i < studentsForClass.size(); i++) {
+                    world.addNPC(studentsForClass.get(i));
+                    if (i < 4){
+                        studentsForClass.get(i).setMovementAI(new PatrolAI(baitMidrash));
+                    }
+                }
+            }
         }
     }
 
