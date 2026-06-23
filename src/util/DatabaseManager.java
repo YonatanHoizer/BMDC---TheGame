@@ -1,92 +1,81 @@
 package util;
 
-import util.SaveData;
 import java.sql.*;
 
 public class DatabaseManager {
 
-    // פרטי ההתחברות לשרת ה-MySQL שרץ בתוך ה-Docker
-    private static final String URL = "jdbc:mysql://localhost:3307/yeshiva_game?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
-    private static final String USER = "root";
-    private static final String PASSWORD = "root";
+    // הקובץ game_save.db ייווצר אוטומטית בתיקיית השורש של המשחק
+    private static final String URL = "jdbc:sqlite:game_save.db";
 
     /**
-     * פונקציה פנימית ליצירת חיבור למסד הנתונים
+     * פונקציה פנימית ליצירת חיבור למסד הנתונים של SQLite
      */
     private static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        return DriverManager.getConnection(URL);
     }
 
     /**
-     * איתחול מסד הנתונים - יוצר את הטבלה אוטומטית אם היא לא קיימת בריצה הראשונה
+     * איתחול מסד הנתונים
      */
     public static void initDatabase() {
+        // ב-SQLite אנחנו משתמשים ב-REAL (למספרים עם נקודה עשרונית) וב-INTEGER (לבוליאנים)
         String createTableSQL = "CREATE TABLE IF NOT EXISTS tbl_savegame (" +
-                "id INT PRIMARY KEY DEFAULT 1," + // תמיד נשמור על שורה אחת (מפתח קבוע 1) כדי לדרוס את השמירה הקודמת
-                "player_x FLOAT NOT NULL," +
-                "player_y FLOAT NOT NULL," +
-                "current_state VARCHAR(50) NOT NULL," +
-                "has_milk BOOLEAN NOT NULL" +
+                "id INTEGER PRIMARY KEY DEFAULT 1," +
+                "player_x REAL NOT NULL," +
+                "player_y REAL NOT NULL," +
+                "current_state TEXT NOT NULL," +
+                "has_milk INTEGER NOT NULL" +
                 ");";
 
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute(createTableSQL);
         } catch (SQLException e) {
-            System.err.println("Error initializing database! Make sure Docker is running.");
+            System.err.println("Error initializing SQLite database!");
             e.printStackTrace();
         }
     }
 
     /**
-     * שמירת מצב המשחק (INSERT או UPDATE במידה וכבר קיימת שמירה)
+     * שמירת מצב המשחק - שימוש ב-REPLACE כדי לדרוס את השמירה הקודמת
      */
     public static void saveGame(SaveData data) {
-        // שאילתת SQL מתוחכמת: מנסה להכניס שמירה, ואם ה-id כבר קיים (שזה תמיד קורה מהשמירה השנייה והלאה), היא פשוט מעדכנת את הערכים!
-        String saveSQL = "INSERT INTO tbl_savegame (id, player_x, player_y, current_state, has_milk) " +
-                "VALUES (1, ?, ?, ?, ?) " +
-                "ON DUPLICATE KEY UPDATE " +
-                "player_x = VALUES(player_x), " +
-                "player_y = VALUES(player_y), " +
-                "current_state = VALUES(current_state), " +
-                "has_milk = VALUES(has_milk);";
+        // REPLACE INTO מבצע אוטומטית DELETE ואז INSERT אם ה-ID קיים
+        String saveSQL = "REPLACE INTO tbl_savegame (id, player_x, player_y, current_state, has_milk) " +
+                "VALUES (1, ?, ?, ?, ?);";
 
         try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(saveSQL)) {
-
             pstmt.setFloat(1, data.playerX);
             pstmt.setFloat(2, data.playerY);
             pstmt.setString(3, data.currentState);
             pstmt.setBoolean(4, data.playerHasMilk);
 
             pstmt.executeUpdate();
-
         } catch (SQLException e) {
-            System.err.println("Failed to save game to database.");
+            System.err.println("Failed to save game to SQLite.");
             e.printStackTrace();
         }
     }
 
     /**
-     * טעינת מצב המשחק מהדאטה בייס
+     * טעינת מצב המשחק
      */
     public static SaveData loadGame() {
         String loadSQL = "SELECT * FROM tbl_savegame WHERE id = 1;";
 
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(loadSQL)) {
 
-            // אם נמצאה שורת שמירה בטבלה
             if (rs.next()) {
-                float x = rs.getFloat("player_x");
-                float y = rs.getFloat("player_y");
-                String state = rs.getString("current_state");
-                boolean hasMilk = rs.getBoolean("has_milk");
-                return new SaveData(x, y, state, hasMilk);
+                return new SaveData(
+                        rs.getFloat("player_x"),
+                        rs.getFloat("player_y"),
+                        rs.getString("current_state"),
+                        rs.getBoolean("has_milk")
+                );
             }
-
         } catch (SQLException e) {
-            System.err.println("Failed to load game from database.");
+            System.err.println("Failed to load game from SQLite.");
             e.printStackTrace();
         }
-
-        return null; // מחזיר null במידה ואין עדיין אף שמירה בדאטה בייס
+        return null;
     }
 }

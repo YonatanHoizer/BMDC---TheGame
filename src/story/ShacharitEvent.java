@@ -100,6 +100,7 @@ public class ShacharitEvent extends GameState {
         }
         worshippers.get(12).setAlert(true);
         worshippers.get(7).setAlert(true);
+        worshippers.get(3).setAlert(true);
 
         world.getHUD().showTimer("זמן לכניסה לתפילה", 20);
     }
@@ -189,6 +190,16 @@ public class ShacharitEvent extends GameState {
                 isTalkingToStatic = true;
                 worshippers.get(7).setAlert(false);
                 dBox.startDialogue(List.of("מה הקטע של הפינת קפה אם בחיים אין בה \n לא קפה, לא חלב, לא כפיות, ולא סוכר?!"));
+            }
+        }
+
+        if (!isTalkingToStatic && world.getPlayer().getDistanceSquared(worshippers.get(3)) < (64 * 64)) {
+            if (world.getInput().Z_key && dBox.isReady() && !player.isPhoneOpen()) {
+
+                world.getPlayer().setInDialogue(true);
+                isTalkingToStatic = true;
+                worshippers.get(3).setAlert(false);
+                dBox.startDialogue(List.of("שמעתי ליחשושים שאם אתה חייב ללכת או סתם רוצה לעצור\n אתה יכול ללחוץ ESC"));
             }
         }
 
