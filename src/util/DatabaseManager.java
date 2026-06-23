@@ -11,7 +11,16 @@ public class DatabaseManager {
      * פונקציה פנימית ליצירת חיבור למסד הנתונים של SQLite
      */
     private static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL);
+        // 1. יצירת אובייקט של התיקייה
+        java.io.File directory = new java.io.File("saves");
+
+        // 2. בדיקה: אם התיקייה לא קיימת - צור אותה!
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
+
+        // 3. החזרת החיבור לנתיב החדש בתוך התיקייה
+        return DriverManager.getConnection("jdbc:sqlite:saves/game_save.db");
     }
 
     /**

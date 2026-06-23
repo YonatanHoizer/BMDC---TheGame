@@ -3,7 +3,6 @@ package ui;
 import engine.InputManager;
 import main.Game;
 import entities.Player;
-import hud.HUD;
 import story.StoryState;
 import world.GameWorld;
 import engine.Camera;
